@@ -62,6 +62,67 @@ def parseTable(lines):
   for line in lines:
     parts = line.split(' ')
 
+class K:
+  regs = ['b', 'c', 'd', 'e', 'h', 'l', 'm', 'a']
+  def __init__(self, b, addrExpr):
+    self.b = b
+    self.addrExpr = addrExpr
+
+  def reg(self, i):
+    return 'this.' + K.regs[i]
+
+  def ddd(self):
+    return self.reg(self.ddd_I())
+
+  def ddd_I(self):
+    return (self.b & (0x7 << 3)) >> 3
+
+  def sss(self):
+    return self.reg(self.sss_I())
+
+  def sss_I(self):
+    return self.b & 0x7
+
+  def db(self):
+    return 'this.mem[' + self.addrExpr + '+1]'
+
+  def addr(self):
+    return 'this.mem[(this.mem[' + self.addrExpr + '+1] << 8) | (this.mem[' + self.addrExpr + '+2])]'
+
+  def hl(self):
+    return 'this.mem[(this.h << 8) | (this.l)]'
+
+  def regName(self, i):
+    return '"' + K.regs[i] + '"'
+
+  def addrName(self):
+    return '"[" + ' + self.addr() + ' + "]"'
+
+  def go(self, note):
+    if re.search('SSS', note):
+      note = re.sub('SSS', self.sss(), note)
+    if re.search('DDD', note):
+      note = re.sub('DDD', self.ddd(), note)
+    if re.search('db', note):
+      note = re.sub('db', self.db(), note)
+    if re.search('addr', note):
+      note = re.sub('addr', self.addr(), note)
+    if re.search('HL', note):
+      note = re.sub('HL', self.hl(), note)
+    return note
+
+  def subWord(self, word):
+    if word == 'SSS':
+      return self.regName(self.sss_I())
+    elif word == 'DDD':
+      return self.regName(self.ddd_I())
+    elif word == 'addr':
+      return self.addrName()
+    elif word == 'db':
+      return self.db()
+    else:
+      return '"' + word + '"'
+
 class Instruction:
   def __init__(self, prefix, p1, p2, name, size, skip):
     self.prefix = prefix
@@ -71,6 +132,7 @@ class Instruction:
     self.size = size
     self.skip = skip
     self.notes = []
+    self.disas = None
 
   def template(self):
     r = self.prefix + self.p1 + self.p2
@@ -87,51 +149,24 @@ class Instruction:
     return (tm & b) == t
 
   def kompile(self, b):
-    regs = ['b', 'c', 'd', 'e', 'h', 'l', 'm', 'a']
-    class K:
-      def __init__(self, note):
-        self.note = note
-
-      def reg(self, i):
-        return 'this.' + regs[i]
-
-      def ddd(self):
-        return self.reg((b & (0x7 << 3)) >> 3)
-
-      def sss(self):
-        return self.reg(b & 0x7)
-
-      def db(self):
-        return 'this.mem[this.pc+1]'
-
-      def addr(self):
-        # return 'this.addr()'
-        return 'this.mem[(this.mem[this.pc+1] << 8) | (this.mem[this.pc+2])]'
-
-      def hl(self):
-        return 'this.mem[(this.H << 8) | (this.L)]'
-
-      def go(self):
-        note = self.note
-        if re.search('RRR', note):
-          note = re.sub('RRR', self.rrr(), note)
-        if re.search('SSS', note):
-          note = re.sub('SSS', self.sss(), note)
-        if re.search('DDD', note):
-          note = re.sub('DDD', self.ddd(), note)
-        if re.search('db', note):
-          note = re.sub('db', self.db(), note)
-        if re.search('addr', note):
-          note = re.sub('addr', self.addr(), note)
-        if re.search('HL', note):
-          note = re.sub('HL', self.hl(), note)
-        return note
-
     result = []
+    k = K(b, 'this.pc')
     for note in self.notes:
-      result.append(K(note).go())
+      result.append(k.go(note))
     if self.skip > 0:
       result.append('this.pc += ' + str(self.skip) + ';')
+    return result
+
+  def genDisas(self, b):
+    result = []
+    k = K(b, 'addr')
+    if self.disas is None:
+      return ['return ["' + self.name + '", ' + str(self.size) + '];']
+    d = self.disas
+    d = re.sub(',', '', d)
+    parts = [k.subWord(word) for word in d.split(' ')]
+    jsDisas = ' + " " + '.join(parts)
+    result.append('return [' + jsDisas + ', ' + str(self.size) + '];')
     return result
 
   def __repr__(self):
@@ -140,17 +175,25 @@ class Instruction:
 instructions = []
 with open('decoder_table') as f:
   prefix = '00'
+  disas = None
   notes = []
   for line in f:
     line = line.rstrip()
     if line == '':
       continue
     if line[0] == ' ':
-      notes.append(line.strip())
+      sline = line.strip()
+      if sline[0] == '#':
+        disas = sline[1:].strip()
+      else:
+        notes.append(sline)
       continue
     if len(notes) > 0:
       instructions[-1].notes = notes
       notes = []
+    if disas is not None:
+      instructions[-1].disas = disas
+      disas = None
     parts = line.split(' ')
     if len(parts) == 1:
       prefix = parts[0]
@@ -166,6 +209,8 @@ with open('decoder_table') as f:
   if len(notes) > 0:
     instructions[-1].notes = notes
     notes = []
+  if disas is not None:
+    instructions[-1].disas = disas
 
 def lookupInstruction(b):
   for i in instructions:
@@ -176,15 +221,6 @@ class Compiler:
   def __init__(self):
     self.output = []
     self.indent_level = 0
-
-  def run(self):
-    self.p('CPU.prototype.execute = function() {')
-    self.indent()
-    self.p('var i = this.mem[this.pc];')
-    self.generateSwitch()
-    self.outdent()
-    self.p('};')
-    return self.output
 
   def indent(self):
     self.indent_level += 2
@@ -198,6 +234,12 @@ class Compiler:
   def getIndent(self):
     return self.indent_level * ' '
 
+  def run(self):
+    pass
+
+  def caseBody(self):
+    pass
+
   def generateSwitch(self):
     self.p('switch (i) {')
     for b in range(256):
@@ -205,13 +247,42 @@ class Compiler:
       if i is None:
         # print 'failed to lookup %s' % int2bin(b, 8)
         continue
-      self.p('case 0x%s:  // %s' % (int2hex(b, 2), i.name))
+      self.p('case 0x%s:  // %s %s' % (int2hex(b, 2), int2bin(b, 8), i.name))
       self.indent()
-      for line in i.kompile(b):
-        self.p('%s' % line)
-      self.p('break;')
+      self.caseBody(i, b)
       self.outdent()
     self.p('}')
+
+# Generates a function to disassemble instructions.
+class DisasCompiler(Compiler):
+  def run(self):
+    self.p('CPU.prototype.disas = function(addr, count) {')
+    self.p('var i = this.mem[addr];');
+    self.indent()
+    self.generateSwitch()
+    self.outdent()
+    self.p('};')
+    return self.output
+
+  def caseBody(self, i, b):
+    for line in i.genDisas(b):
+      self.p(line)
+    self.p('break;')
+
+class ExecuteCompiler(Compiler):
+  def run(self):
+    self.p('CPU.prototype.execute = function() {')
+    self.indent()
+    self.p('var i = this.mem[this.pc];')
+    self.generateSwitch()
+    self.outdent()
+    self.p('};')
+    return self.output
+
+  def caseBody(self, i, b):
+    for line in i.kompile(b):
+      self.p(line)
+    self.p('break;')
 
 def disas(bts):
   print 'disassembling %s' % ints2bin(bts, 8)
@@ -258,7 +329,10 @@ def test2(bs):
 with open('cpu_header.js') as f:
   for line in f:
     if line == '///\n':
-      output = Compiler().run()
+      output = ExecuteCompiler().run()
+      for l in output:
+        print l
+      output = DisasCompiler().run()
       for l in output:
         print l
       continue

@@ -7,7 +7,11 @@ function CPU() {
   this.l = 0;
   this.a = 0;
   this.pc = 0;
-  this.mem = new Array(65536);
+  var memSize = 65536;
+  this.mem = new Array(memSize);
+  for (var i = 0; i < memSize; i++) {
+    this.mem[i] = 0;
+  }
 };
 CPU.prototype.dumpReg = function() {
   var regs = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'pc'];
@@ -16,18 +20,11 @@ CPU.prototype.dumpReg = function() {
   }
 };
 ///
-var c = new CPU();
+var cpu = new CPU();
 // mvi c, 9
-c.mem[0] = 0x0e;
-c.mem[1] = 0x09;
+cpu.mem[0] = 0x0e;
+cpu.mem[1] = 0x09;
 // mov b, c
-c.mem[2] = 0x41;
+cpu.mem[2] = 0x41;
 // INC b   00000100
-c.mem[3] = 0x04
-
-c.dumpReg();
-console.log('');
-c.execute();
-c.execute();
-c.execute();
-c.dumpReg();
+cpu.mem[3] = 0x04
