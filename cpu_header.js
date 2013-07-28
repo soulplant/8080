@@ -19,6 +19,37 @@ CPU.prototype.dumpReg = function() {
     console.log(regs[i] + '=' + this[regs[i]]);
   }
 };
+// FLAGS: S Z x A x P x C
+var CARRY = 1;
+var PARITY = 4;
+var A = 16;
+var ZERO = 128;
+var SIGN = 256;
+// Set the ZSCPA flags from b.
+CPU.prototype.zscpa = function(b) {
+  this.zspa(b);
+};
+// Set the ZSPA flags from b.
+CPU.prototype.zspa = function(b) {
+};
+CPU.prototype.inr = function(b) {
+  b++;
+  if (b > 255)
+    this.f |= CARRY;
+  b &= 0xff;
+  if (b == 0)
+    this.f |= ZERO;
+  return b;
+};
+CPU.prototype.dcr = function(b) {
+  b--;
+  if (b < 0)
+    this.f |= CARRY;
+  b &= 0xff;
+  if (b == 0)
+    this.f |= ZERO;
+  return b;
+};
 ///
 var cpu = new CPU();
 // mvi c, 9
