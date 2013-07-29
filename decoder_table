@@ -18,10 +18,10 @@ RP1 011 DCX_RP
 
 DDD 100 INR
   # INR DDD
-  DDD = this.inr(DDD);
+  DDD = this.zscpa(DDD + 1);
 DDD 101 DCR
   # DCR DDD
-  DDD = this.dcr(DDD);
+  DDD = this.zscpa(DDD - 1);
 DDD 110 MVI_R 2
   # MVI DDD, db
   DDD = db;

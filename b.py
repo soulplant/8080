@@ -72,13 +72,19 @@ class K:
     return 'this.' + K.regs[i]
 
   def ddd(self):
-    return self.reg(self.ddd_I())
+    i = self.ddd_I()
+    if i == 0x6:
+      return self.hl()
+    return self.reg(i)
 
   def ddd_I(self):
     return (self.b & (0x7 << 3)) >> 3
 
   def sss(self):
-    return self.reg(self.sss_I())
+    i = self.sss_I()
+    if i == 0x6:
+      return self.hl()
+    return self.reg(i)
 
   def sss_I(self):
     return self.b & 0x7
