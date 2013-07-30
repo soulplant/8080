@@ -23,28 +23,10 @@ CPU.prototype.dumpReg = function() {
 // FLAGS: S Z x A x P x C
 var CARRY = 1;
 var PARITY = 4;
-var A = 16;
+var AUX_CARRY = 16;
 var INTERRUPT = 32;
 var ZERO = 64;
 var SIGN = 128;
-// Set the ZSCPA flags from b.
-CPU.prototype.zscpa = function(b) {
-  if (b > 255 || b < 0)
-    this.f |= CARRY;
-  b &= 0xff;
-  if (b == 0)
-    this.f |= ZERO;
-  if ((b & 0x40) != 0)
-    this.f |= SIGN;
-  else
-    this.f &= ~SIGN;
-  this.parity(b);
-  return b;
-  // TODO: Aux Carry bit.
-};
-// Set the ZSPA flags from b.
-CPU.prototype.zspa = function(b) {
-};
 CPU.prototype.parity = function(b) {
   var parity = true;
   var n = 1;
@@ -55,21 +37,45 @@ CPU.prototype.parity = function(b) {
   }
   return parity;
 };
-CPU.prototype.cmc = function() {
-  if ((this.f & CARRY) != 0) {
-    this.f &= ~CARRY;
-  } else {
-    this.f |= CARRY;
-  }
+CPU.prototype.setFlag = function(f, v) {
+  if (v)
+    this.f |= f;
+  else
+    this.f &= ~f;
 };
-CPU.prototype.stc = function() {
-  this.f |= CARRY;
+CPU.prototype.add = function(b, n, c) {
+  this.setFlag(AUX_CARRY, (b & 0x7) + (n & 0x7) > 0x7);
+  var result = b + n;
+  if (c)
+    this.setFlag(CARRY, result > 0xff);
+  result &= 0xff;
+  this.setFlag(SIGN, (result & 0x40) != 0);
+  this.setFlag(ZERO, result == 0);
+  this.setFlag(PARITY, this.parity(result));
+  return result;
+};
+CPU.prototype.sub = function(b, n, c) {
+  this.setFlag(AUX_CARRY, (b & 0x7) < (n & 0x7));
+  var result = b - n;
+  if (c)
+    this.setFlag(CARRY, result < -128);
+  result &= 0xff;
+  this.setFlag(SIGN, (result & 0x40) != 0);
+  this.setFlag(ZERO, result == 0);
+  this.setFlag(PARITY, this.parity(result));
+  return result;
 };
 CPU.prototype.inr = function(b) {
-  return this.zscp(++b);
+  return this.add(b, 1, false /* no carry */);
 };
 CPU.prototype.dcr = function(b) {
-  return this.zscp(--b);
+  return this.sub(b, 1, false /* no carry */);
+};
+CPU.prototype.cmc = function() {
+  this.setFlag(CARRY, (this.f & CARRY) != 0);
+};
+CPU.prototype.stc = function() {
+  this.setFlag(CARRY, true);
 };
 ///
 var cpu = new CPU();
@@ -78,5 +84,13 @@ cpu.mem[0] = 0x0e;
 cpu.mem[1] = 0xff;
 // mov b, c
 cpu.mem[2] = 0x41;
-// INC b   00000100
+// inr b   00000100
 cpu.mem[3] = 0x04
+// inr b   00000100
+cpu.mem[4] = 0x04
+// inr b   00000100
+cpu.mem[5] = 0x04
+// inr hl  00110100
+cpu.mem[6] = 0x34
+// hlt     01110110
+cpu.mem[7] = 0x76

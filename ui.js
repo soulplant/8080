@@ -4,6 +4,7 @@ var memDumpOutput = document.getElementById('memdump');
 var instructionDumpOutput = document.getElementById('idump');
 
 var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc'];
+var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
 var regElems = {};
 
 for (var i in registers) {
@@ -16,6 +17,10 @@ function updateRegViews() {
   for (var i in registers) {
     var r = registers[i];
     regElems[r].innerText = cpu[r];
+  }
+  for (var f in flags) {
+    var x = (cpu.f & flags[f]) > 0;
+    document.getElementById('flag-' + f).innerText = x ? '1' : '0';
   }
 }
 
@@ -54,10 +59,21 @@ function updateIDump() {
   instructionDumpOutput.innerText = disas;
 }
 
+function int2hex(n, len) {
+  var digits = '0123456789abcdef';
+  var base = digits.length;
+  var result = '';
+  for (var i = 0; i < len; i++) {
+    result = digits[n % base] + result;
+    n = Math.floor(n / base);
+  }
+  return result;
+}
+
 function getMemoryDump(cpu, addr) {
   var text = '';
   for (var i = 0; i < 16; i++) {
-    text += cpu.mem[addr + i];
+    text += int2hex(cpu.mem[addr + i], 2);
     text += ' ';
   }
   return text;
