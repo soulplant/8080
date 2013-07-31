@@ -64,6 +64,7 @@ def parseTable(lines):
 
 class K:
   regs = ['b', 'c', 'd', 'e', 'h', 'l', 'm', 'a']
+  regPairs = ['bc', 'de', 'hl', 'sp']
   def __init__(self, b, addrExpr):
     self.b = b
     self.addrExpr = addrExpr
@@ -92,8 +93,11 @@ class K:
   def db(self):
     return 'this.mem[' + self.addrExpr + '+1]'
 
+  def arg16(self):
+    return '((this.mem[' + self.addrExpr + '+1]) | (this.mem[' + self.addrExpr + '+2] << 8))'
+
   def addr(self):
-    return 'this.mem[(this.mem[' + self.addrExpr + '+1] << 8) | (this.mem[' + self.addrExpr + '+2])]'
+    return 'this.mem[' + self.arg16() + ']'
 
   def hl(self):
     return 'this.mem[(this.h << 8) | (this.l)]'
@@ -103,6 +107,15 @@ class K:
 
   def addrName(self):
     return '"[" + ' + self.addr() + ' + "]"'
+
+  def arg16Name(self):
+    return self.arg16()
+
+  def rp_(self):
+    return self.jsQuote(K.regPairs[(self.b >> 4) & 0x3])
+
+  def jsQuote(self, s):
+    return '"' + s + '"'
 
   def go(self, note):
     if re.search('SSS', note):
@@ -115,6 +128,10 @@ class K:
       note = re.sub('addr', self.addr(), note)
     if re.search('HL', note):
       note = re.sub('HL', self.hl(), note)
+    if re.search('RP_', note):
+      note = re.sub('RP_', self.rp_(), note)
+    if re.search('arg16', note):
+      note = re.sub('arg16', self.arg16(), note)
     return note
 
   def subWord(self, word):
@@ -126,6 +143,10 @@ class K:
       return self.addrName()
     elif word == 'db':
       return self.db()
+    elif word == 'RP':
+      return self.rp_()
+    elif word == 'arg16':
+      return self.arg16Name()
     else:
       return '"' + word + '"'
 
@@ -263,8 +284,8 @@ class Compiler:
 class DisasCompiler(Compiler):
   def run(self):
     self.p('CPU.prototype.disas = function(addr, count) {')
-    self.p('var i = this.mem[addr];');
     self.indent()
+    self.p('var i = this.mem[addr];');
     self.generateSwitch()
     self.outdent()
     self.p('};')

@@ -7,7 +7,8 @@ function CPU() {
   this.l = 0;
   this.a = 0;
   this.f = 0;
-  this.pc = 0;
+  this.pc = 0;  // 16bit
+  this.sp = 0;  // 16bit
   var memSize = 65536;
   this.mem = new Array(memSize);
   for (var i = 0; i < memSize; i++) {
@@ -18,6 +19,11 @@ CPU.prototype.dumpReg = function() {
   var regs = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc'];
   for(var i in regs) {
     console.log(regs[i] + '=' + this[regs[i]]);
+  }
+};
+CPU.prototype.load = function(bs) {
+  for (var i = 0; i < bs.length; i++) {
+    this.mem[i] = bs[i];
   }
 };
 // FLAGS: S Z x A x P x C
@@ -77,8 +83,25 @@ CPU.prototype.cmc = function() {
 CPU.prototype.stc = function() {
   this.setFlag(CARRY, true);
 };
+CPU.prototype.lxi = function(rp, arg16) {
+  console.log('lxi', rp, arg16)
+  if (rp == 'sp') {
+    this.sp = arg16;
+  } else {
+    this[rp[0]] = (arg16 >> 8) & 0xff;
+    this[rp[1]] = arg16 & 0xff;
+  }
+};
 ///
 var cpu = new CPU();
+cpu.load([
+  // LXI b, 258
+  0x1, 0x1, 0x2,
+
+  // LXI c, 258
+  0x31, 0x1, 0x2
+  ]);
+/*
 // mvi c, 0xff
 cpu.mem[0] = 0x0e;
 cpu.mem[1] = 0xff;
@@ -94,3 +117,4 @@ cpu.mem[5] = 0x04
 cpu.mem[6] = 0x34
 // hlt     01110110
 cpu.mem[7] = 0x76
+*/

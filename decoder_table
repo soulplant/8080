@@ -2,6 +2,8 @@
 000 000 NOP
 
 RP0 001 LXI 3
+  # LXI RP, arg16
+  this.lxi(RP_, arg16)
 RP1 001 DAD
 
 000 010 STAX_B
@@ -32,8 +34,11 @@ DDD 110 MVI_R 2
 011 111 RAR
 100 111 DAD
 101 111 CMA
+  this.a = ~this.a;
 110 111 STC
+  this.stc();
 111 111 CMC
+  this.cmc();
 
 01
 110 110 HALT 1

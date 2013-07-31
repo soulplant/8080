@@ -3,7 +3,7 @@ var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
 var instructionDumpOutput = document.getElementById('idump');
 
-var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc'];
+var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc', 'sp'];
 var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
 var regElems = {};
 
