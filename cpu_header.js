@@ -92,8 +92,31 @@ CPU.prototype.lxi = function(rp, arg16) {
     this[rp[1]] = arg16 & 0xff;
   }
 };
+CPU.prototype.rpAsU16 = function(rp) {
+  return (this[rp[0]] << 8) | this[rp[1]]
+};
+CPU.prototype.stax = function(rp) {
+  console.log(this.rpAsU16(rp));
+  this.mem[this.rpAsU16(rp)] = this.a;
+};
+CPU.prototype.ldax = function(rp) {
+  this.a = this.mem[this.rpAsU16(rp)];
+};
 ///
 var cpu = new CPU();
+cpu.load([
+  // MVI A, 8
+  0x3e, 0x08,   // 0011 1110
+  // MVI C, 8
+  0x0e, 0x08,   // 0000 1110
+  // STAX B
+  0x2,          // 0000 0010
+  // MVI A, 3
+  0x3e, 0x03,   // 0011 1110
+  // LDAX B
+  0x0a          // 0000 1010
+  ]);
+/*
 cpu.load([
   // LXI b, 258
   0x1, 0x1, 0x2,
@@ -101,6 +124,7 @@ cpu.load([
   // LXI c, 258
   0x31, 0x1, 0x2
   ]);
+*/
 /*
 // mvi c, 0xff
 cpu.mem[0] = 0x0e;

@@ -222,16 +222,13 @@ with open('decoder_table') as f:
       instructions[-1].disas = disas
       disas = None
     parts = line.split(' ')
-    if len(parts) == 1:
-      prefix = parts[0]
-      continue
     size = 1
-    if len(parts) >= 4:
-      size = int(parts[3])
-    skip = size
     if len(parts) >= 5:
-      skip = int(parts[4])
-    instruction = Instruction(prefix, parts[0], parts[1], parts[2], size, skip)
+      size = int(parts[4])
+    skip = size
+    if len(parts) >= 6:
+      skip = int(parts[5])
+    instruction = Instruction(parts[0], parts[1], parts[2], parts[3], size, skip)
     instructions.append(instruction)
   if len(notes) > 0:
     instructions[-1].notes = notes
