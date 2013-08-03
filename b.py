@@ -96,7 +96,7 @@ class K:
   def arg16(self):
     return '((this.mem[' + self.addrExpr + '+1]) | (this.mem[' + self.addrExpr + '+2] << 8))'
 
-  def addr(self):
+  def mref(self):
     return 'this.mem[' + self.arg16() + ']'
 
   def hl(self):
@@ -117,6 +117,7 @@ class K:
   def jsQuote(self, s):
     return '"' + s + '"'
 
+  # TODO: Prefix these variables with $.
   def go(self, note):
     if re.search('SSS', note):
       note = re.sub('SSS', self.sss(), note)
@@ -124,8 +125,8 @@ class K:
       note = re.sub('DDD', self.ddd(), note)
     if re.search('db', note):
       note = re.sub('db', self.db(), note)
-    if re.search('addr', note):
-      note = re.sub('addr', self.addr(), note)
+    if re.search('mref', note):
+      note = re.sub('mref', self.mref(), note)
     if re.search('HL', note):
       note = re.sub('HL', self.hl(), note)
     if re.search('RP_', note):

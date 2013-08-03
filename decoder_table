@@ -14,7 +14,7 @@
   this.storeU16(arg16, this.hl());
 00 110 010 STA 3
   # STA addr
-  addr = this.a;
+  mref = this.a;
 00 001 010 LDAX_B
   # LDAX bc
   this.ldax('bc');
@@ -26,7 +26,7 @@
   this.loadU16('hl', arg16);
 00 111 010 LDA 3
   # LDA addr
-  this.a = addr;
+  this.a = mref;
 00 RP0 011 INX_RP
 00 RP1 011 DCX_RP
 00 DDD 100 INR
@@ -95,7 +95,7 @@
 11 111 011 EI
 
 11 CCC 100 CALL_C 3 0
-  this.pc = addr;
+  this.pc = arg16;
 
 11 RP0 101 PUSH_RP
 
