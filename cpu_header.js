@@ -49,17 +49,24 @@ CPU.prototype.setFlag = function(f, v) {
   else
     this.f &= ~f;
 };
-CPU.prototype.hl = function() {
-  return (this.h << 8) | this.l;
+CPU.prototype.rpValue = function(rp) {
+  return (this[rp[0]] << 8) | this[rp[1]];
 };
 CPU.prototype.storeU16 = function(addr, u16) {
   this.mem[addr] = 0xff & u16;
   this.mem[addr+1] = 0xff & (u16 >> 8);
 };
 CPU.prototype.loadU16 = function(rp, addr) {
-  console.log('storeU16', rp, addr);
   this[rp[1]] = this.mem[addr];
   this[rp[0]] = this.mem[addr+1];
+};
+CPU.prototype.loadImmU16 = function(rp, u16) {
+  if (rp == 'sp') {
+    this.sp = u16;
+    return;
+  }
+  this[rp[0]] = (u16 >> 8) & 0xff;
+  this[rp[1]] = u16 & 0xff;
 };
 CPU.prototype.add = function(b, n, c) {
   this.setFlag(AUX_CARRY, (b & 0x7) + (n & 0x7) > 0x7);
@@ -95,26 +102,21 @@ CPU.prototype.cmc = function() {
 CPU.prototype.stc = function() {
   this.setFlag(CARRY, true);
 };
-CPU.prototype.lxi = function(rp, arg16) {
-  console.log('lxi', rp, arg16)
-  if (rp == 'sp') {
-    this.sp = arg16;
-  } else {
-    this[rp[0]] = (arg16 >> 8) & 0xff;
-    this[rp[1]] = arg16 & 0xff;
-  }
-};
-CPU.prototype.rpAsU16 = function(rp) {
-  return (this[rp[0]] << 8) | this[rp[1]]
-};
-CPU.prototype.stax = function(rp) {
-  this.mem[this.rpAsU16(rp)] = this.a;
-};
-CPU.prototype.ldax = function(rp) {
-  this.a = this.mem[this.rpAsU16(rp)];
+CPU.prototype.dad = function(rp) {
+  var result = this.rpValue(rp) + this.rpValue('hl');
+  console.log(result);
+  this.setFlag(CARRY, result > 0xffff);
+  this.loadImmU16('hl', result & 0xffff);
 };
 ///
 var cpu = new CPU();
+cpu.load([
+  // MVI h, 0xff
+  0x26, 0xff,  // 0010 0110
+  // DAD HL
+  0x29,        // 0010 1001
+]);
+/*
 cpu.load([
   // MVI h, 1
   0x26, 0x01,        // 0010 0110
@@ -129,6 +131,7 @@ cpu.load([
   // LHLD [0x0102]
   0x2a, 0x02, 0x01,  // 0010 1010
 ]);
+*/
 /*
 cpu.load([
   // LDA [0x0000]

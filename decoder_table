@@ -1,26 +1,27 @@
 00 000 000 NOP
 00 RP0 001 LXI 3
   # LXI RP, arg16
-  this.lxi(RP_, arg16)
+  this.loadImmU16(RP_NAME, arg16)
 00 RP1 001 DAD
+  this.dad(RP_NAME);
 00 000 010 STAX_B
   # STAX bc
-  this.stax('bc')
+  RP_MEM = this.a;
 00 010 010 STAX_D
   # STAX de
-  this.stax('de')
+  RP_MEM = this.a;
 00 100 010 SHLD 3
   # SHLD addr
   this.storeU16(arg16, this.hl());
 00 110 010 STA 3
   # STA addr
   mref = this.a;
-00 001 010 LDAX_B
-  # LDAX bc
-  this.ldax('bc');
-00 011 010 LDAX_D
-  # LDAX de
-  this.ldax('de');
+00 001 010 LDAX_BC
+  # LDAX RP
+  this.a = RP_MEM;
+00 011 010 LDAX_DE
+  # LDAX RP
+  this.a = RP_MEM;
 00 101 010 LHLD 3
   # LHLD addr
   this.loadU16('hl', arg16);

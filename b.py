@@ -96,11 +96,11 @@ class K:
   def arg16(self):
     return '((this.mem[' + self.addrExpr + '+1]) | (this.mem[' + self.addrExpr + '+2] << 8))'
 
-  def mref(self):
-    return 'this.mem[' + self.arg16() + ']'
+  def mem(self, expr):
+    return 'this.mem[' + expr + ']';
 
   def hl(self):
-    return 'this.mem[(this.h << 8) | (this.l)]'
+    return self.mem('(this.h << 8) | (this.l)')
 
   def regName(self, i):
     return '"' + K.regs[i] + '"'
@@ -111,8 +111,17 @@ class K:
   def arg16Name(self):
     return self.arg16()
 
-  def rp_(self):
-    return self.jsQuote(K.regPairs[(self.b >> 4) & 0x3])
+  def rpIndex(self):
+    return (self.b >> 4) & 0x3
+
+  def rpName(self):
+    return self.jsQuote(K.regPairs[self.rpIndex()])
+
+  def rpValue(self):
+    return 'this.rpValue(' + self.rpName() + ')'
+
+  def rpMem(self):
+    return self.mem(self.rpValue())
 
   def jsQuote(self, s):
     return '"' + s + '"'
@@ -126,11 +135,13 @@ class K:
     if re.search('db', note):
       note = re.sub('db', self.db(), note)
     if re.search('mref', note):
-      note = re.sub('mref', self.mref(), note)
+      note = re.sub('mref', self.mem(self.arg16()), note)
     if re.search('HL', note):
       note = re.sub('HL', self.hl(), note)
-    if re.search('RP_', note):
-      note = re.sub('RP_', self.rp_(), note)
+    if re.search('RP_NAME', note):
+      note = re.sub('RP_NAME', self.rpName(), note)
+    if re.search('RP_MEM', note):
+      note = re.sub('RP_MEM', self.rpMem(), note)
     if re.search('arg16', note):
       note = re.sub('arg16', self.arg16(), note)
     return note
@@ -145,7 +156,7 @@ class K:
     elif word == 'db':
       return self.db()
     elif word == 'RP':
-      return self.rp_()
+      return self.rpName()
     elif word == 'arg16':
       return self.arg16Name()
     else:
