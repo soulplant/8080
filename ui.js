@@ -59,6 +59,7 @@ function updateIDump() {
   instructionDumpOutput.innerText = disas;
 }
 
+// TODO: Move to separate js file as this is needed by cpu.js.
 function int2hex(n, len) {
   var digits = '0123456789abcdef';
   var base = digits.length;
@@ -72,9 +73,12 @@ function int2hex(n, len) {
 
 function getMemoryDump(cpu, addr) {
   var text = '';
-  for (var i = 0; i < 16; i++) {
-    text += int2hex(cpu.mem[addr + i], 2);
-    text += ' ';
+  for (var page = 0; page < 4; page++) {
+    for (var i = 0; i < 8; i++) {
+      text += int2hex(cpu.mem[addr + (page * 8) + i], 2);
+      text += ' ';
+    }
+    text += '\n';
   }
   return text;
 }

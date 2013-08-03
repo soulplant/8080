@@ -105,6 +105,13 @@ CPU.prototype.ldax = function(rp) {
 ///
 var cpu = new CPU();
 cpu.load([
+  // LDA [0x0000]
+  0x3a, 0x00, 0x00,  // 0011 1010
+  // STA [0x0008]
+  0x32, 0x08, 0x00,  // 0011 0010
+]);
+/*
+cpu.load([
   // MVI A, 8
   0x3e, 0x08,   // 0011 1110
   // MVI C, 8
@@ -116,6 +123,7 @@ cpu.load([
   // LDAX B
   0x0a          // 0000 1010
   ]);
+*/
 /*
 cpu.load([
   // LXI b, 258

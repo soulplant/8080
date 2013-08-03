@@ -11,6 +11,8 @@
   this.stax('de')
 00 100 010 SHLD
 00 110 010 STA 3
+  # STA addr
+  addr = this.a;
 00 001 010 LDAX_B
   # LDAX bc
   this.ldax('bc');
@@ -19,6 +21,8 @@
   this.ldax('de');
 00 101 010 LHLD 3
 00 111 010 LDA 3
+  # LDA addr
+  this.a = addr;
 00 RP0 011 INX_RP
 00 RP1 011 DCX_RP
 00 DDD 100 INR
