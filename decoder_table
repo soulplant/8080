@@ -9,7 +9,9 @@
 00 010 010 STAX_D
   # STAX de
   this.stax('de')
-00 100 010 SHLD
+00 100 010 SHLD 3
+  # SHLD addr
+  this.storeU16(arg16, this.hl());
 00 110 010 STA 3
   # STA addr
   addr = this.a;
@@ -20,6 +22,8 @@
   # LDAX de
   this.ldax('de');
 00 101 010 LHLD 3
+  # LHLD addr
+  this.loadU16('hl', arg16);
 00 111 010 LDA 3
   # LDA addr
   this.a = addr;

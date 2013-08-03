@@ -49,6 +49,18 @@ CPU.prototype.setFlag = function(f, v) {
   else
     this.f &= ~f;
 };
+CPU.prototype.hl = function() {
+  return (this.h << 8) | this.l;
+};
+CPU.prototype.storeU16 = function(addr, u16) {
+  this.mem[addr] = 0xff & u16;
+  this.mem[addr+1] = 0xff & (u16 >> 8);
+};
+CPU.prototype.loadU16 = function(rp, addr) {
+  console.log('storeU16', rp, addr);
+  this[rp[1]] = this.mem[addr];
+  this[rp[0]] = this.mem[addr+1];
+};
 CPU.prototype.add = function(b, n, c) {
   this.setFlag(AUX_CARRY, (b & 0x7) + (n & 0x7) > 0x7);
   var result = b + n;
@@ -96,7 +108,6 @@ CPU.prototype.rpAsU16 = function(rp) {
   return (this[rp[0]] << 8) | this[rp[1]]
 };
 CPU.prototype.stax = function(rp) {
-  console.log(this.rpAsU16(rp));
   this.mem[this.rpAsU16(rp)] = this.a;
 };
 CPU.prototype.ldax = function(rp) {
@@ -105,11 +116,27 @@ CPU.prototype.ldax = function(rp) {
 ///
 var cpu = new CPU();
 cpu.load([
+  // MVI h, 1
+  0x26, 0x01,        // 0010 0110
+  // MVI l, 2
+  0x2e, 0x02,        // 0010 1110
+  // SHLD [0x0102]
+  0x22, 0x02, 0x01,  // 0010 0010
+  // MVI h, 8
+  0x26, 0x08,        // 0010 0110
+  // MVI l, 8
+  0x2e, 0x08,        // 0010 1110
+  // LHLD [0x0102]
+  0x2a, 0x02, 0x01,  // 0010 1010
+]);
+/*
+cpu.load([
   // LDA [0x0000]
   0x3a, 0x00, 0x00,  // 0011 1010
   // STA [0x0008]
   0x32, 0x08, 0x00,  // 0011 0010
 ]);
+*/
 /*
 cpu.load([
   // MVI A, 8
