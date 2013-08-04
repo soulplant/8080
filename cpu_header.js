@@ -1,4 +1,18 @@
 function CPU() {
+  this.reset();
+};
+CPU.prototype.dumpReg = function() {
+  var regs = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc'];
+  for (var i in regs) {
+    console.log(regs[i] + '=' + this[regs[i]]);
+  }
+};
+CPU.prototype.load = function(bs) {
+  for (var i = 0; i < bs.length; i++) {
+    this.mem[i] = bs[i];
+  }
+};
+CPU.prototype.reset = function() {
   this.b = 0;
   this.c = 0;
   this.d = 0;
@@ -14,18 +28,7 @@ function CPU() {
   for (var i = 0; i < memSize; i++) {
     this.mem[i] = 0;
   }
-};
-CPU.prototype.dumpReg = function() {
-  var regs = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc'];
-  for(var i in regs) {
-    console.log(regs[i] + '=' + this[regs[i]]);
-  }
-};
-CPU.prototype.load = function(bs) {
-  for (var i = 0; i < bs.length; i++) {
-    this.mem[i] = bs[i];
-  }
-};
+}
 // FLAGS: S Z x A x P x C
 var CARRY = 1;
 var PARITY = 4;
@@ -50,6 +53,8 @@ CPU.prototype.setFlag = function(f, v) {
     this.f &= ~f;
 };
 CPU.prototype.rpValue = function(rp) {
+  if (rp == 'sp')
+    return this.sp;
   return (this[rp[0]] << 8) | this[rp[1]];
 };
 CPU.prototype.storeU16 = function(addr, u16) {
@@ -109,70 +114,3 @@ CPU.prototype.dad = function(rp) {
   this.loadImmU16('hl', result & 0xffff);
 };
 ///
-var cpu = new CPU();
-var programs = {
-  'dad': [
-    // MVI h, 0xff
-    0x26, 0xff,  // 0010 0110
-    // MVI l, 0x01
-    0x2e, 0x01,  // 0010 1110
-    // DAD HL
-    0x29,        // 0010 1001
-  ],
-  'shld': [
-    // MVI h, 1
-    0x26, 0x01,        // 0010 0110
-    // MVI l, 2
-    0x2e, 0x02,        // 0010 1110
-    // SHLD [0x0102]
-    0x22, 0x02, 0x01,  // 0010 0010
-    // MVI h, 8
-    0x26, 0x08,        // 0010 0110
-    // MVI l, 8
-    0x2e, 0x08,        // 0010 1110
-    // LHLD [0x0102]
-    0x2a, 0x02, 0x01,  // 0010 1010
-  ],
-  'lda': [
-    // LDA [0x0000]
-    0x3a, 0x00, 0x00,  // 0011 1010
-    // STA [0x0008]
-    0x32, 0x08, 0x00,  // 0011 0010
-  ],
-  'stax': [
-    // MVI A, 8
-    0x3e, 0x08,   // 0011 1110
-    // MVI C, 8
-    0x0e, 0x08,   // 0000 1110
-    // STAX B
-    0x2,          // 0000 0010
-    // MVI A, 3
-    0x3e, 0x03,   // 0011 1110
-    // LDAX B
-    0x0a          // 0000 1010
-  ],
-  'lxi': [
-    // LXI b, 258
-    0x1, 0x1, 0x2,
-
-    // LXI c, 258
-    0x31, 0x1, 0x2
-  ],
-  'inr': [
-  // MVI c, 0xff
-  0x0e, 0xff,
-  // MOV b, c
-  0x41,
-  // INR b
-  0x04,
-  // INR b
-  0x04,
-  // INR b
-  0x04,
-  // INR hl
-  0x34,
-  // hlt
-  0x76,
-  ],
-};
-cpu.load(programs['dad']);

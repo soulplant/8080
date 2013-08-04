@@ -28,8 +28,12 @@
 00 111 010 LDA 3
   # LDA addr
   this.a = mref;
-00 RP0 011 INX_RP
-00 RP1 011 DCX_RP
+00 RP0 011 INX
+  # INX RP
+  this.loadImmU16(RP_NAME, (RP_VAL + 1) & 0xffff);
+00 RP1 011 DCX
+  # DCX RP
+  this.loadImmU16(RP_NAME, (RP_VAL - 1) & 0xffff);
 00 DDD 100 INR
   # INR DDD
   DDD = this.inr(DDD);

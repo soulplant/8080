@@ -13,6 +13,9 @@ for (var i in registers) {
   regElems[r] = elem;
 }
 
+var cpu = new CPU();
+cpu.load(programs['inx']);
+
 function updateRegViews() {
   for (var i in registers) {
     var r = registers[i];
@@ -83,16 +86,33 @@ function getMemoryDump(cpu, addr) {
   return text;
 }
 
+function updateView() {
+  updateRegViews();
+  updateMemoryDump();
+  updateIDump();
+}
+
+function step() {
+  cpu.execute();
+  updateView();
+}
+
 addressInput.addEventListener('change', function() {
   updateMemoryDump();
 });
 
-stepButton.addEventListener('click', function() {
-  cpu.execute();
-  updateRegViews();
-  updateMemoryDump();
-  updateIDump();
-});
+stepButton.addEventListener('click', step);
 
 updateMemoryDump();
 updateIDump();
+
+document.addEventListener('keypress', function(e) {
+  if (e.keyCode == 's'.charCodeAt(0)) {
+    cpu.execute();
+    updateView();
+  } else if (e.keyCode == 'r'.charCodeAt(0)) {
+    cpu.reset();
+    cpu.load(programs['inx']);
+    updateView();
+  }
+});

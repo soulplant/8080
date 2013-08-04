@@ -138,6 +138,8 @@ class K:
       note = re.sub('mref', self.mem(self.arg16()), note)
     if re.search('HL', note):
       note = re.sub('HL', self.hl(), note)
+    if re.search('RP_VAL', note):
+      note = re.sub('RP_VAL', self.rpValue(), note)
     if re.search('RP_NAME', note):
       note = re.sub('RP_NAME', self.rpName(), note)
     if re.search('RP_MEM', note):
