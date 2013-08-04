@@ -40,7 +40,7 @@
 00 DDD 101 DCR
   # DCR DDD
   DDD = this.dcr(DDD);
-00 DDD 110 MVI_R 2
+00 DDD 110 MVI 2
   # MVI DDD, db
   DDD = db;
 00 000 111 RLC
