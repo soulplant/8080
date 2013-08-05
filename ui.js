@@ -2,6 +2,7 @@ var stepButton = document.getElementById('step');
 var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
 var instructionDumpOutput = document.getElementById('idump');
+var programListElem = document.getElementById('program-list');
 
 var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc', 'sp'];
 var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
@@ -14,7 +15,6 @@ for (var i in registers) {
 }
 
 var cpu = new CPU();
-cpu.load(programs['daa']);
 
 function updateRegViews() {
   for (var i in registers) {
@@ -98,21 +98,46 @@ function step() {
   updateView();
 }
 
+function resetAndLoad(bs) {
+  cpu.reset();
+  cpu.load(bs);
+  updateView();
+}
+
+function createProgramOptions() {
+  var programNameList = [];
+  var programList = [];
+  programListElem.addEventListener('change', function(e) {
+    resetAndLoad(programList[programListElem.selectedIndex]);
+    localStorage['last-program'] = programNameList[programListElem.selectedIndex];
+  });
+  for (var name in programs) {
+    programNameList.push(name);
+    programList.push(programs[name]);
+    var o = document.createElement('option');
+    o.innerText = name;
+    programListElem.appendChild(o);
+  }
+}
+
 addressInput.addEventListener('change', function() {
   updateMemoryDump();
 });
 
 stepButton.addEventListener('click', step);
 
-updateView();
-
 document.addEventListener('keypress', function(e) {
   if (e.keyCode == 's'.charCodeAt(0)) {
     cpu.execute();
     updateView();
   } else if (e.keyCode == 'r'.charCodeAt(0)) {
-    cpu.reset();
-    cpu.load(programs['inx']);
-    updateView();
+    resetAndLoad(programs[localStorage['last-program']]);
   }
 });
+
+createProgramOptions();
+
+if (!localStorage['last-program']) {
+  localStorage['last-program'] = 'daa';
+}
+resetAndLoad(programs[localStorage['last-program']]);

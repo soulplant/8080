@@ -12,7 +12,7 @@
   RP_MEM = this.a;
 00 100 010 SHLD 3
   # SHLD addr
-  this.storeU16(arg16, this.hl());
+  this.storeU16(arg16, this.rpValue('hl'));
 00 110 010 STA 3
   # STA addr
   mref = this.a;
@@ -69,14 +69,16 @@
 01 110 110 HALT
   return;
 
-10 000 RRR ADD_R
-10 001 RRR ADC_R
-10 010 RRR SUB_R
-10 011 RRR SBB_R
-10 100 RRR ANA_R
-10 101 RRR XRA_R
-10 110 RRR ORA_R
-10 111 RRR CMP_R
+10 000 SSS ADD_R
+  # ADD SSS
+  this.a = this.add(this.a, SSS, true);
+10 001 SSS ADC_R
+10 010 SSS SUB_R
+10 011 SSS SBB_R
+10 100 SSS ANA_R
+10 101 SSS XRA_R
+10 110 SSS ORA_R
+10 111 SSS CMP_R
 
 11 CCC 000 RET_C
 

@@ -1,5 +1,11 @@
 
 var programs = {
+  'add': [
+    // MVI a, 0xff
+    0x3e, 0xff,  // 0011 1110
+    // ADD a
+    0x87,        // 1000 0111
+  ],
   'daa': [
     // MVI a, 0x19
     0x3e, 0x19,  // 0011 1110
