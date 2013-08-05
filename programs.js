@@ -1,5 +1,17 @@
 
 var programs = {
+  'sub-mem': [
+    // MVI a, 0xff
+    0x3e, 0xff,  // 0011 1110
+    // SUB mem
+    0x96,        // 1001 0110
+  ],
+  'sub': [
+    // MVI a, 0xff
+    0x3e, 0xff,  // 0011 1110
+    // SUB a
+    0x97,        // 1001 0111
+  ],
   'adc': [
     // MVI a, 0xff
     0x3e, 0xff,  // 0011 1110
