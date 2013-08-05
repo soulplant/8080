@@ -14,12 +14,13 @@ for (var i in registers) {
 }
 
 var cpu = new CPU();
-cpu.load(programs['inx']);
+cpu.load(programs['daa']);
 
 function updateRegViews() {
   for (var i in registers) {
     var r = registers[i];
-    regElems[r].innerText = cpu[r];
+    var hexChars = r.length * 2;
+    regElems[r].innerText = int2hex(cpu[r], hexChars);
   }
   for (var f in flags) {
     var x = (cpu.f & flags[f]) > 0;
@@ -103,8 +104,7 @@ addressInput.addEventListener('change', function() {
 
 stepButton.addEventListener('click', step);
 
-updateMemoryDump();
-updateIDump();
+updateView();
 
 document.addEventListener('keypress', function(e) {
   if (e.keyCode == 's'.charCodeAt(0)) {

@@ -52,6 +52,9 @@ CPU.prototype.setFlag = function(f, v) {
   else
     this.f &= ~f;
 };
+CPU.prototype.getFlag = function(f) {
+  return (this.f & f) > 0;
+};
 CPU.prototype.rpValue = function(rp) {
   if (rp == 'sp')
     return this.sp;
@@ -113,4 +116,19 @@ CPU.prototype.dad = function(rp) {
   this.setFlag(CARRY, result > 0xffff);
   this.loadImmU16('hl', result & 0xffff);
 };
+CPU.prototype.daa = function() {
+  var low4 = this.a & 0xf;
+  if (low4 > 9 || this.getFlag(AUX_CARRY)) {
+    this.setFlag(AUX_CARRY, low4 + 6 > 0xf);
+    this.a += 6;
+  }
+  var high4 = (this.a >> 4) & 0xf;
+  if (high4 > 9 || this.getFlag(CARRY)) {
+    if (high4 + 6 > 0xf)
+      this.setFlag(CARRY, true);
+    high4 = (high4 + 6) & 0xf;
+    this.a = (high4 << 4) | (this.a & 0xf);
+  }
+};
+///
 ///

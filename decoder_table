@@ -48,6 +48,7 @@
 00 010 111 RAL
 00 011 111 RAR
 00 100 111 DAA
+  this.daa();
 00 101 111 CMA
   this.a = ~this.a;
 00 110 111 STC
