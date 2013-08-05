@@ -69,10 +69,12 @@
 01 110 110 HALT
   return;
 
-10 000 SSS ADD_R
+10 000 SSS ADD
   # ADD SSS
   this.a = this.add(this.a, SSS, true);
-10 001 SSS ADC_R
+10 001 SSS ADC
+  # ADC SSS
+  this.a = this.add(this.a + (this.getFlag(CARRY) ? 1 : 0), SSS, true);
 10 010 SSS SUB_R
 10 011 SSS SBB_R
 10 100 SSS ANA_R

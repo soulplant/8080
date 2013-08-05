@@ -1,5 +1,15 @@
 
 var programs = {
+  'adc': [
+    // MVI a, 0xff
+    0x3e, 0xff,  // 0011 1110
+    // MVI b, 0x01
+    0x06, 0x01,  // 0000 0110
+    // ADC b
+    0x88,        // 1000 1000
+    // ADC b
+    0x88,        // 1000 1000
+  ],
   'add': [
     // MVI a, 0xff
     0x3e, 0xff,  // 0011 1110
