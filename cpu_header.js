@@ -105,7 +105,7 @@ CPU.prototype.dcr = function(b) {
   return this.sub(b, 1, false /* no carry */);
 };
 CPU.prototype.cmc = function() {
-  this.setFlag(CARRY, (this.f & CARRY) != 0);
+  this.setFlag(CARRY, !this.getFlag(CARRY));
 };
 CPU.prototype.stc = function() {
   this.setFlag(CARRY, true);

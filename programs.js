@@ -1,5 +1,15 @@
 
 var programs = {
+  'sbb': [
+    // MVI a, 0x01
+    0x3e, 0x01,  // 0011 1110
+    // MVI b, 0x00
+    0x06, 0x00,  // 0000 0110
+    // CMC
+    0x3f,
+    // SBB b
+    0x98,        // 1001 1000
+  ],
   'mov-mem': [
     // MOV a, [hl]
     0x7e,        // 0111 1110
