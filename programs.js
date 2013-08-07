@@ -24,6 +24,12 @@ var programs = {
     // SUB [hl]
     0x96,        // 1001 0110
   ],
+  'sub-zero': [
+    // MVI a, 0xff
+    0x3e, 0xff,  // 0011 1110
+    // SUB b
+    0x90,        // 1001 0000
+  ],
   'sub': [
     // MVI a, 0xff
     0x3e, 0xff,  // 0011 1110

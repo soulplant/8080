@@ -52,10 +52,9 @@
 00 101 111 CMA
   this.a = ~this.a;
 00 110 111 STC
-  this.stc();
+  this.setFlag(CARRY, true);
 00 111 111 CMC
-  this.cmc();
-
+  this.setFlag(CARRY, !this.getFlag(CARRY));
 01 110 110 HLT
 01 DDD SSS MOV
   # MOV DDD, SSS
@@ -69,12 +68,21 @@
   this.a = this.add(this.a + this.getFlag(CARRY), SSS, true);
 10 010 SSS SUB
   # SUB SSS
-  this.a = this.add(this.a, (1 + ~SSS) & 0xff, true);
+  this.a = this.sub(this.a, SSS, true);
 10 011 SSS SBB
-  this.a = this.add(this.a, (1 + ~(SSS + this.getFlag(CARRY))) & 0xff, true);
+  this.a = this.sub(this.a, SSS + this.getFlag(CARRY), true); // test this
 10 100 SSS ANA
+  this.a = this.zsp(this.a & SSS);
+  this.setFlag(CARRY, false);
+  this.setFlag(AUX_CARRY, false);
 10 101 SSS XRA
+  this.a = this.zsp(this.a ^ SSS);
+  this.setFlag(CARRY, false);
+  this.setFlag(AUX_CARRY, false);
 10 110 SSS ORA
+  this.a = this.zsp(this.a | SSS);
+  this.setFlag(CARRY, false);
+  this.setFlag(AUX_CARRY, false);
 10 111 SSS CMP
 
 11 CCC 000 RET_C

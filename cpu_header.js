@@ -82,33 +82,24 @@ CPU.prototype.add = function(b, n, c) {
   if (c)
     this.setFlag(CARRY, result > 0xff);
   result &= 0xff;
-  this.setFlag(SIGN, (result & 0x40) != 0);
-  this.setFlag(ZERO, result == 0);
-  this.setFlag(PARITY, this.parity(result));
+  this.zsp(result);
   return result;
 };
 CPU.prototype.sub = function(b, n, c) {
-  this.setFlag(AUX_CARRY, (b & 0x7) < (n & 0x7));
-  var result = b - n;
-  if (c)
-    this.setFlag(CARRY, result < -128);
-  result &= 0xff;
-  this.setFlag(SIGN, (result & 0x40) != 0);
-  this.setFlag(ZERO, result == 0);
-  this.setFlag(PARITY, this.parity(result));
+  var result = this.add(b, -n & 0xff, c);
+  this.setFlag(CARRY, !this.getFlag(CARRY));
   return result;
+};
+CPU.prototype.zsp = function(result) {
+  this.setFlag(ZERO, result == 0);
+  this.setFlag(SIGN, (result & 0x40) != 0);
+  this.setFlag(PARITY, this.parity(result));
 };
 CPU.prototype.inr = function(b) {
   return this.add(b, 1, false /* no carry */);
 };
 CPU.prototype.dcr = function(b) {
   return this.sub(b, 1, false /* no carry */);
-};
-CPU.prototype.cmc = function() {
-  this.setFlag(CARRY, !this.getFlag(CARRY));
-};
-CPU.prototype.stc = function() {
-  this.setFlag(CARRY, true);
 };
 CPU.prototype.dad = function(rp) {
   var result = this.rpValue(rp) + this.rpValue('hl');
