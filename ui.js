@@ -42,6 +42,23 @@ function hex2int(str) {
   return total;
 }
 
+function int2base(n, digits, len) {
+  var result = '';
+  for (var i = 0; i < len; i++) {
+    result = digits[(n % digits.length)] + result;
+    n /= digits.length;
+  }
+  return result;
+}
+
+function int2bin(n, len) {
+  return int2base(n, '01', len);
+}
+
+function int2hex(n, len) {
+  return int2base(n, '0123456789abcdef', len);
+}
+
 function updateMemoryDump() {
   var addr = hex2int(addressInput.value);
   var text = '<invalid>';

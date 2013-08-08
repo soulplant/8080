@@ -13,6 +13,7 @@ CPU.prototype.load = function(bs) {
   }
 };
 CPU.prototype.reset = function() {
+  var memSize = 0x10000;
   this.b = 0;
   this.c = 0;
   this.d = 0;
@@ -20,10 +21,9 @@ CPU.prototype.reset = function() {
   this.h = 0;
   this.l = 0;
   this.a = 0;
-  this.f = 0;
-  this.pc = 0;  // 16bit
-  this.sp = 0;  // 16bit
-  var memSize = 65536;
+  this.f = 0x02;  // sz0a 0p1c
+  this.pc = 0;    // 16bit
+  this.sp = memSize - 1;    // 16bit
   this.mem = new Array(memSize);
   for (var i = 0; i < memSize; i++) {
     this.mem[i] = 0;
@@ -92,7 +92,7 @@ CPU.prototype.sub = function(b, n, c) {
 };
 CPU.prototype.zsp = function(result) {
   this.setFlag(ZERO, result == 0);
-  this.setFlag(SIGN, (result & 0x40) != 0);
+  this.setFlag(SIGN, (result & 0x80) != 0);
   this.setFlag(PARITY, this.parity(result));
 };
 CPU.prototype.inr = function(b) {
@@ -120,6 +120,22 @@ CPU.prototype.daa = function() {
     high4 = (high4 + 6) & 0xf;
     this.a = (high4 << 4) | (this.a & 0xf);
   }
+};
+CPU.prototype.push = function(rp) {
+  if (rp == 'sp')
+    rp = 'af';
+  this.mem[this.sp - 1] = this[rp[0]];
+  this.mem[this.sp - 2] = this[rp[1]];
+  this.sp -= 2;
+  this.sp &= 0xffff;
+};
+CPU.prototype.pop = function(rp) {
+  if (rp == 'sp')
+    rp = 'af';
+  this[rp[0]] = this.mem[this.sp + 1];
+  this[rp[1]] = this.mem[this.sp];
+  this.sp += 2;
+  this.sp &= 0xffff;
 };
 ///
 ///

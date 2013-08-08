@@ -44,9 +44,23 @@
   # MVI DDD, db
   DDD = db;
 00 000 111 RLC
+  var msb = (this.a & 0x80) != 0;
+  this.setFlag(CARRY, msb);
+  this.a = ((this.a << 1) & 0xff) | msb;
 00 001 111 RRC
+  var lsb = (this.a & 0x01) != 0;
+  this.setFlag(CARRY, lsb);
+  this.a = ((this.a >> 1) & 0xff) | (lsb * 0x80);
 00 010 111 RAL
+  var msb = (this.a & 0x80) != 0;
+  var c = this.getFlag(CARRY);
+  this.setFlag(CARRY, msb);
+  this.a = ((this.a << 1) & 0xff) | c;
 00 011 111 RAR
+  var lsb = (this.a & 0x01) != 0;
+  var c = this.getFlag(CARRY);
+  this.setFlag(CARRY, lsb);
+  this.a = ((this.a >> 1) & 0xff) | (c * 0x80);
 00 100 111 DAA
   this.daa();
 00 101 111 CMA
@@ -84,10 +98,14 @@
   this.setFlag(CARRY, false);
   this.setFlag(AUX_CARRY, false);
 10 111 SSS CMP
+  this.sub(this.a, SSS, true);
+  if ((this.a & 0x80) != (SSS & 0x80))
+    this.setFlag(CARRY, this.getFlag(CARRY));
 
 11 CCC 000 RET_C
 
-11 RP0 001 POP_RP
+11 RP0 001 POP
+  this.pop(RP_NAME);
 
 11 001 001 RET 1 0
   this.pc = this.pop();
@@ -110,7 +128,8 @@
 11 CCC 100 CALL_C 3 0
   this.pc = arg16;
 
-11 RP0 101 PUSH_RP
+11 RP0 101 PUSH
+  this.push(RP_NAME);
 
 11 001 101 CALL
 11 011 101 NOT_USED
