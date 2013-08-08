@@ -70,7 +70,7 @@
   # SUB SSS
   this.a = this.sub(this.a, SSS, true);
 10 011 SSS SBB
-  this.a = this.sub(this.a, SSS + this.getFlag(CARRY), true); // test this
+  this.a = this.sub(this.a, SSS + this.getFlag(CARRY), true);
 10 100 SSS ANA
   this.a = this.zsp(this.a & SSS);
   this.setFlag(CARRY, false);
