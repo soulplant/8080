@@ -1,4 +1,3 @@
-
 var programs = {
   'cnz': [
     // CNZ 0x0005
@@ -211,24 +210,23 @@ var programs = {
   'lxi': [
     // LXI b, 258
     0x1, 0x1, 0x2,
-
     // LXI c, 258
     0x31, 0x1, 0x2
   ],
   'inr': [
-  // MVI c, 0xff
-  0x0e, 0xff,
-  // MOV b, c
-  0x41,
-  // INR b
-  0x04,
-  // INR b
-  0x04,
-  // INR b
-  0x04,
-  // INR hl
-  0x34,
-  // hlt
-  0x76,
+    // MVI c, 0xff
+    0x0e, 0xff,
+    // MOV b, c
+    0x41,
+    // INR b
+    0x04,
+    // INR b
+    0x04,
+    // INR b
+    0x04,
+    // INR hl
+    0x34,
+    // hlt
+    0x76,
   ],
 };
