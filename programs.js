@@ -1,12 +1,32 @@
 
 var programs = {
+  'cnz': [
+    // CNZ 0x0005
+    0xc4, 0x05, 0x00,  // 1100 0100
+    // NOP
+    0x00,
+    // NOP
+    0x00,
+    // RET
+    0xc9,              // 1100 1001
+  ],
+  'call': [
+    // CALL 0x0005
+    0xcd, 0x05, 0x00,  // 1100 1101
+    // NOP
+    0x00,
+    // NOP
+    0x00,
+    // RET
+    0xc9,              // 1100 1001
+  ],
   'push/pop': [
     // MVI a, 0xfe
     0x3e, 0xfe,  // 0011 1110
     // PUSH fa
     0xf5,        // 1111 0101
-    // MVI a, 0x0e
-    0x3e, 0x0e,  // 0011 1110
+    // MVI a, 0x01
+    0x3e, 0x01,  // 0011 1110
     // POP fa
     0xf1         // 1111 0001
   ],

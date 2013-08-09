@@ -103,7 +103,6 @@ CPU.prototype.dcr = function(b) {
 };
 CPU.prototype.dad = function(rp) {
   var result = this.rpValue(rp) + this.rpValue('hl');
-  console.log(result);
   this.setFlag(CARRY, result > 0xffff);
   this.loadImmU16('hl', result & 0xffff);
 };
@@ -124,17 +123,44 @@ CPU.prototype.daa = function() {
 CPU.prototype.push = function(rp) {
   if (rp == 'sp')
     rp = 'af';
-  this.mem[this.sp - 1] = this[rp[0]];
-  this.mem[this.sp - 2] = this[rp[1]];
+  this.pushU16(this.rpValue(rp));
+};
+CPU.prototype.pushU16 = function(u16) {
   this.sp -= 2;
   this.sp &= 0xffff;
+  this.writeU16(this.sp, u16);
 };
 CPU.prototype.pop = function(rp) {
   if (rp == 'sp')
     rp = 'af';
-  this[rp[0]] = this.mem[this.sp + 1];
-  this[rp[1]] = this.mem[this.sp];
+  var u16 = this.popU16();
+  this[rp[0]] = (u16 >> 8) & 0xff;
+  this[rp[1]] = u16 & 0xff;
+};
+CPU.prototype.popU16 = function() {
+  var result = this.readU16(this.sp);
   this.sp += 2;
   this.sp &= 0xffff;
+  return result;
+};
+CPU.prototype.readU16 = function(addr) {
+  return (this.mem[addr + 1] << 8) | this.mem[addr];
+};
+CPU.prototype.writeU16 = function(addr, u16) {
+  this.mem[addr] = u16 & 0xff;
+  this.mem[addr + 1] = (u16 >> 8) & 0xff;
+};
+CPU.prototype.cond = function(cond) {
+  switch (cond) {
+    case 0: /* CNZ */ return !this.getFlag(ZERO);
+    case 1: /* CZ  */ return this.getFlag(ZERO);
+    case 2: /* CNC */ return !this.getFlag(CARRY);
+    case 3: /* CC  */ return this.getFlag(CARRY);
+    case 4: /* CPO */ return !this.getFlag(PARITY);
+    case 5: /* CPE */ return this.getFlag(PARITY);
+    case 6: /* CP  */ return !this.getFlag(SIGN);
+    case 7: /* CM  */ return this.getFlag(SIGN);
+    default: console.log("bad cond");
+  }
 };
 ///

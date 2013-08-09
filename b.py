@@ -65,12 +65,22 @@ def parseTable(lines):
 class K:
   regs = ['b', 'c', 'd', 'e', 'h', 'l', 'm', 'a']
   regPairs = ['bc', 'de', 'hl', 'sp']
+  condNames = ['NZ', 'Z', 'NC', 'C', 'PO', 'PE', 'P', 'M']
   def __init__(self, b, addrExpr):
     self.b = b
     self.addrExpr = addrExpr
 
   def reg(self, i):
     return 'this.' + K.regs[i]
+
+  def ccc_I(self):
+    return self.ddd_I()
+
+  def ccc(self):
+    return str(self.ccc_I())
+
+  def cccName(self, i):
+    return self.jsQuote(K.condNames[i])
 
   def ddd(self):
     i = self.ddd_I()
@@ -132,6 +142,8 @@ class K:
       note = re.sub('SSS', self.sss(), note)
     if re.search('DDD', note):
       note = re.sub('DDD', self.ddd(), note)
+    if re.search('CCC', note):
+      note = re.sub('CCC', self.ccc(), note)
     if re.search('db', note):
       note = re.sub('db', self.db(), note)
     if re.search('mref', note):
@@ -153,6 +165,8 @@ class K:
       return self.regName(self.sss_I())
     elif word == 'DDD':
       return self.regName(self.ddd_I())
+    elif word == 'CCC':
+      return self.cccName(self.ccc_I())
     elif word == 'addr':
       return self.addrName()
     elif word == 'db':
