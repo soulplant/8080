@@ -98,11 +98,18 @@
   this.setFlag(CARRY, false);
   this.setFlag(AUX_CARRY, false);
 10 111 SSS CMP
+  # CMP SSS
   this.sub(this.a, SSS, true);
   if ((this.a & 0x80) != (SSS & 0x80))
-    this.setFlag(CARRY, this.getFlag(CARRY));
+    this.setFlag(CARRY, !this.getFlag(CARRY));
 
-11 CCC 000 RET_C
+11 CCC 000 RET
+  # R CCC
+  if (this.cond(CCC)) {
+    this.pc = this.popU16();
+  } else {
+    this.pc += 1;
+  }
 
 11 RP0 001 POP
   # POP RP
@@ -131,9 +138,19 @@
 11 010 011 OUT
 11 011 011 IN
 11 100 011 XTHL
+  var l = this.l;
+  var h = this.h;
   this.l = this.mem[this.sp];
-  this.h = this.mem[(this.sp + 1) & 0xffff];
+  this.h = this.mem[(this.sp + 1) & 0xff];
+  this.mem[this.sp] = l;
+  this.mem[(this.sp + 1) & 0xff] = h;
 11 101 011 XCHG
+  var d = this.d;
+  var e = this.e;
+  this.d = this.h;
+  this.e = this.l;
+  this.h = d;
+  this.l = e;
 11 110 011 DI
 11 111 011 EI
 
@@ -161,9 +178,29 @@
 11 111 101 NOT_USED
 
 11 000 110 ADI 2
+  this.a = this.add(this.a, db, true);
+11 001 110 ACI 2
+  this.a = this.add(this.a, db + this.getFlag(CARRY), true);
 11 010 110 SUI 2
+  this.a = this.sub(this.a, db, true);
+11 011 110 SBI 2
+  this.a = this.sub(this.a, db + this.getFlag(CARRY), true);
 11 100 110 ANI 2
+  this.a &= db;
+  this.zsp(this.a);
+  this.setFlag(CARRY, false);
+11 101 110 XRI 2
+  this.a ^= db;
+  this.zsp(this.a);
+  this.setFlag(CARRY, false);
 11 110 110 ORI 2
+  this.a |= db;
+  this.zsp(this.a);
+  this.setFlag(CARRY, false);
+11 111 110 CPI 2
+  this.sub(this.a, db, true);
+  if ((this.a & 0x80) != (db & 0x80))
+    this.setFlag(CARRY, !this.getFlag(CARRY));
 
 11 PPP 111 RST_P
 
