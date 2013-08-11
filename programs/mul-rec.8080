@@ -1,0 +1,23 @@
+  mvi b, 8h
+  mvi c, 4h
+  call mul
+  jmp done
+
+mul:
+  mvi a, 0
+  cmp c
+  rz
+
+mul_loop:
+  mov a, b
+  dcr c
+  rz
+  push af
+  call mul
+  mov d, a
+  pop af
+  add d
+  ret
+
+done:
+  hlt
