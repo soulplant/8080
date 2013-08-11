@@ -63,6 +63,8 @@ Arg.prototype.encodeRegMem = function(op, offset) {
   return new Bits(i, 3, offset);
 };
 Arg.prototype.encodeRegPair = function(op) {
+  if (op == 'af')
+    op = 'sp';
   var rps = ['bc', 'de', 'hl', 'sp'];
   var i = rps.indexOf(op);
   if (i == -1)
@@ -167,21 +169,45 @@ function lookupInstruction(name) {
 }
 
 function Assembler(parsed) {
-  this.parsed = parsed;
+  this.parsed = JSON.parse(JSON.stringify(parsed));
   this.bytes = [];
+  this.labelPositions = {};
 };
-Assembler.prototype.assemble = function() {
+Assembler.prototype.locateLabels = function() {
+  var pc = 0;
   for (var i = 0; i < this.parsed.length; i++) {
     var p = this.parsed[i];
-    switch (p.type) {
-    case 'i':
-      this.handleInstruction(p);
-      break;
-    case 'label':
-      // TODO(koz): Implement.
-      break;
+    if (p.type == 'label') {
+      this.labelPositions[p.name] = pc;
+    } else {
+      var inst = lookupInstruction(p.name);
+      if (!inst)
+        console.log("unknown instruction: " + p.name);
+      else
+        pc += inst.size;
     }
   }
+};
+Assembler.prototype.replaceLabelsWithPositions = function(ops) {
+  for (var i = 0; i < ops.length; i++) {
+    if (typeof ops[i] == 'string') {
+      if (this.labelPositions[ops[i]])
+        ops[i] = this.labelPositions[ops[i]];
+    }
+  }
+};
+Assembler.prototype.encodeInstructions = function() {
+  for (var i = 0; i < this.parsed.length; i++) {
+    var p = this.parsed[i];
+    if (p.type == 'i') {
+      this.replaceLabelsWithPositions(p.ops);
+      this.handleInstruction(p);
+    }
+  }
+};
+Assembler.prototype.assemble = function() {
+  this.locateLabels();
+  this.encodeInstructions();
   return this.bytes;
 };
 Assembler.prototype.handleInstruction = function(p) {
@@ -195,9 +221,11 @@ Assembler.prototype.addBytes = function(bs) {
     this.bytes.push(bs[i]);
 };
 
-var program = 'mov a, b';
-console.log('assembler.js test');
-console.log('assembling program "' + program + '"');
-var a = new Assembler(parser.parse('mov a, b'));
-var bytes = a.assemble();
-console.log(bytes);
+(function() {
+  var program = 'mov a, b';
+  console.log('assembler.js test');
+  console.log('assembling program "' + program + '"');
+  var a = new Assembler(parser.parse('mov a, b'));
+  var bytes = a.assemble();
+  console.log(bytes);
+})();

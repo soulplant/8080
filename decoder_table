@@ -84,16 +84,20 @@
   # SUB SSS
   this.a = this.sub(this.a, SSS, true);
 10 011 SSS SBB
+  # SBB SSS
   this.a = this.sub(this.a, SSS + this.getFlag(CARRY), true);
 10 100 SSS ANA
+  # ANA SSS
   this.a = this.zsp(this.a & SSS);
   this.setFlag(CARRY, false);
   this.setFlag(AUX_CARRY, false);
 10 101 SSS XRA
+  # XRA SSS
   this.a = this.zsp(this.a ^ SSS);
   this.setFlag(CARRY, false);
   this.setFlag(AUX_CARRY, false);
 10 110 SSS ORA
+  # ORA SSS
   this.a = this.zsp(this.a | SSS);
   this.setFlag(CARRY, false);
   this.setFlag(AUX_CARRY, false);
@@ -103,10 +107,11 @@
   if ((this.a & 0x80) != (SSS & 0x80))
     this.setFlag(CARRY, !this.getFlag(CARRY));
 
-11 CCC 000 RET
+11 CCC 000 RET 1 0
   # R$CCC
   if (this.cond(CCC)) {
     this.pc = this.popU16();
+    console.log('popped to', this.pc);
   } else {
     this.pc += 1;
   }
@@ -202,6 +207,6 @@
   if ((this.a & 0x80) != (db & 0x80))
     this.setFlag(CARRY, !this.getFlag(CARRY));
 
-11 PPP 111 RST_P
+11 PPP 111 RST
 
 xx xxx xxx UNK
