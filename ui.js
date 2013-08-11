@@ -1,4 +1,5 @@
 var stepButton = document.getElementById('step');
+var runButton = document.getElementById('run');
 var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
 var stackDumpOutput = document.getElementById('stackdump');
@@ -74,6 +75,7 @@ function updateMemoryDump() {
 function updateStackDump() {
   var addr = cpu.sp;
   var size = 0xffff - cpu.sp;
+  size = Math.min(size, 0x40);
   var rows = size / 2;
   stackDumpOutput.innerText = getMemoryDump(cpu, addr, rows, 1, 2);
 }
@@ -135,6 +137,11 @@ function step() {
   updateView();
 }
 
+function run() {
+  cpu.run();
+  updateView();
+}
+
 function resetAndLoad(bs) {
   cpu.reset();
   cpu.load(bs);
@@ -162,6 +169,7 @@ addressInput.addEventListener('change', function() {
 });
 
 stepButton.addEventListener('click', step);
+runButton.addEventListener('click', run);
 
 document.addEventListener('keypress', function(e) {
   if (e.keyCode == 's'.charCodeAt(0)) {

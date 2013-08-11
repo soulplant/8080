@@ -28,6 +28,7 @@ CPU.prototype.reset = function() {
   for (var i = 0; i < memSize; i++) {
     this.mem[i] = 0;
   }
+  this.running = false;
 }
 // FLAGS: S Z x A x P x C
 var CARRY = 1;
@@ -161,6 +162,12 @@ CPU.prototype.cond = function(cond) {
     case 6: /* CP  */ return !this.getFlag(SIGN);
     case 7: /* CM  */ return this.getFlag(SIGN);
     default: console.log("bad cond");
+  }
+};
+CPU.prototype.run = function() {
+  this.running = true;
+  while (this.running) {
+    this.execute();
   }
 };
 ///

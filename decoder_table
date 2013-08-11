@@ -70,6 +70,7 @@
 00 111 111 CMC
   this.setFlag(CARRY, !this.getFlag(CARRY));
 01 110 110 HLT
+  this.running = false;
 01 DDD SSS MOV
   # MOV DDD, SSS
   DDD = SSS;
@@ -111,7 +112,6 @@
   # R$CCC
   if (this.cond(CCC)) {
     this.pc = this.popU16();
-    console.log('popped to', this.pc);
   } else {
     this.pc += 1;
   }
