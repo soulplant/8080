@@ -1,5 +1,5 @@
 if (typeof require !== 'undefined')
-  parser = require('./asm-parser.js');
+  parser = require('./asm_parser.js');
 
 function removeSpaces(str) {
   while (true) {

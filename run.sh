@@ -4,8 +4,8 @@ if which nodejs ; then
 else
   NODE=node
 fi
-pegjs asm-parser.pegjs
-python gen-cpu.py > cpu.js
-python gen-asm.py > asm.js
+pegjs asm_parser.pegjs
+python gen_cpu.py > cpu.js
+python gen_asm.py > asm.js
 $NODE cpu.js
 $NODE asm.js

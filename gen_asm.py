@@ -9,7 +9,7 @@ def generateInstructionList():
     print "  i('%s', '%s', '%s', %d)," % (i.getDisasName(), i.rawTemplate(), i.getDisas(), i.size)
   print "];"
 
-with open('asm-header.js') as f:
+with open('asm_header.js') as f:
   for line in f:
     if line == '///var instructionList;\n':
       generateInstructionList()
