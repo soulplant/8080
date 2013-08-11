@@ -1,0 +1,18 @@
+  mvi b, 4
+  mvi c, 4
+  call add
+  jmp done
+
+add:
+  mvi a, 0
+  cmp c
+  rz
+
+add_loop:
+  add b
+  dcr c
+  jnz add_loop
+  ret
+
+done:
+  hlt
