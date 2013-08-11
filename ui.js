@@ -151,7 +151,7 @@ document.addEventListener('keypress', function(e) {
     cpu.execute();
     updateView();
   } else if (e.keyCode == 'r'.charCodeAt(0)) {
-    resetAndLoad(programs[localStorage['last-program']]);
+    assembleAndRun();
   }
 });
 
@@ -167,9 +167,15 @@ function assembleAndRun() {
   resetAndLoad(bytes);
 }
 
+if (localStorage['last-asm-program']) {
+  asmInput.value = localStorage['last-asm-program'];
+  assembleAndRun();
+}
+
 asmInput.addEventListener('keypress', function(e) {
   e.cancelBubble = true;
   if (e.charCode == '13' && e.shiftKey) {
+    localStorage['last-asm-program'] = asmInput.value;
     e.preventDefault();
     assembleAndRun();
   }
