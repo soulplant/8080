@@ -142,6 +142,7 @@ class Instruction:
     t = bintools.bin2dec(self.template())
     return (tm & b) == t
 
+  # TODO(koz): This should live outside this class.
   def kompile(self, b):
     result = []
     k = K(b, 'this.pc')
@@ -151,6 +152,7 @@ class Instruction:
       result.append('this.pc += ' + str(self.skip) + ';')
     return result
 
+  # TODO(koz): This should live outside this class.
   def genDisas(self, b):
     result = []
     k = K(b, 'addr')
