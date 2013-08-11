@@ -55,7 +55,7 @@ class K:
     return '"' + K.regs[i] + '"'
 
   def addrName(self):
-    return '"[" + int2hex(' + self.arg16() + ', 4) + "]"'
+    return 'int2hex(' + self.arg16() + ', 4)'
 
   def arg16Name(self):
     return self.arg16()

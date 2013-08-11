@@ -67,7 +67,7 @@ function updateMemoryDump() {
   var addr = hex2int(addressInput.value);
   var text = '<invalid>';
   if (addr != -1)
-    text = getMemoryDump(cpu, addr, 4, 8);
+    text = getMemoryDump(cpu, addr, 4, 8, 1);
   memDumpOutput.innerText = text;
 }
 
@@ -75,7 +75,7 @@ function updateStackDump() {
   var addr = cpu.sp;
   var size = 0xffff - cpu.sp;
   var rows = size / 2;
-  stackDumpOutput.innerText = getMemoryDump(cpu, addr, rows, 2);
+  stackDumpOutput.innerText = getMemoryDump(cpu, addr, rows, 1, 2);
 }
 
 function updateIDump() {
@@ -84,8 +84,9 @@ function updateIDump() {
   for (var i = 0; i < 10; i++) {
     if (addr >= cpu.mem.length)
       break;
+    var addrString = int2hex(addr, 4);
     var r = cpu.disas(addr);
-    disas += r[0] + '\n';
+    disas += addrString + '| ' + r[0] + '\n';
     addr += r[1];
   }
   instructionDumpOutput.innerText = disas;
@@ -103,11 +104,18 @@ function int2hex(n, len) {
   return result;
 }
 
-function getMemoryDump(cpu, addr, rows, columns) {
+function getMemoryDump(cpu, addr, rows, columns, wordSize) {
   var text = '';
   for (var r = 0; r < rows; r++) {
     for (var c = 0; c < columns; c++) {
-      text += int2hex(cpu.mem[addr + (r * columns) + c], 2);
+      var num = 0;
+      var bits = 0;
+      for (var i = 0; i < wordSize; i++) {
+        var mem = cpu.mem[addr + (r * columns * wordSize) + (c * wordSize) + i];
+        num += mem << bits;
+        bits += 8;
+      }
+      text += int2hex(num, wordSize * 2);
       text += ' ';
     }
     text += '\n';
