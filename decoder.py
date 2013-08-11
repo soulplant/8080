@@ -128,6 +128,14 @@ class Instruction:
     self.notes = []
     self.disas = None
 
+  def getDisas(self):
+    if self.disas is None:
+      return self.name
+    return self.disas
+
+  def rawTemplate(self):
+    return self.prefix + self.p1 + self.p2
+
   def template(self):
     r = self.prefix + self.p1 + self.p2
     return re.sub(r'[a-zA-Z]', '0', r)

@@ -3,6 +3,9 @@ var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
 var instructionDumpOutput = document.getElementById('idump');
 var programListElem = document.getElementById('program-list');
+var asmInput = document.getElementById('asm');
+var asmOutput = document.getElementById('asm-out');
+var asmRunButton = document.getElementById('asm-run');
 
 var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc', 'sp'];
 var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
@@ -158,3 +161,18 @@ if (!localStorage['last-program']) {
   localStorage['last-program'] = 'daa';
 }
 resetAndLoad(programs[localStorage['last-program']]);
+
+function assembleAndRun() {
+  var bytes = new Assembler(parser.parse(asmInput.value)).assemble();
+  resetAndLoad(bytes);
+}
+
+asmInput.addEventListener('keypress', function(e) {
+  if (e.charCode == '13' && e.shiftKey) {
+    assembleAndRun();
+    e.preventDefault();
+  }
+});
+asmRunButton.addEventListener('click', function() {
+  assembleAndRun();
+});
