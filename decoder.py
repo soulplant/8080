@@ -118,15 +118,34 @@ class K:
       return '"' + word + '"'
 
 class Instruction:
-  def __init__(self, prefix, p1, p2, name, size, skip):
+  def __init__(self, prefix, p1, p2, name, size, skip, notes=[], disas=None):
     self.prefix = prefix
     self.p1 = p1
     self.p2 = p2
     self.name = name
     self.size = size
     self.skip = skip
-    self.notes = []
-    self.disas = None
+    self.notes = notes
+    self.disas = disas
+
+  def clone(self):
+    return Instruction(self.prefix, self.p1, self.p2, self.name, self.size,
+        self.skip, self.notes, self.disas)
+
+  def isConditional(self):
+    return self.disas is not None and self.disas.find('$') != -1
+
+  def expandConditional(self):
+    result = []
+    for i, n in enumerate(K.condNames):
+      ins = self.clone()
+      ins.setConditional(i)
+      result.append(ins)
+    return result
+
+  def setConditional(self, n):
+    self.disas = re.sub(r'\$CCC', K.condNames[n], self.disas)
+    self.p1 = bintools.int2bin(n, 3)
 
   def getDisasName(self):
     if self.disas is None:
@@ -179,12 +198,25 @@ class Instruction:
     return result
 
   def __repr__(self):
-    return '%s [%s%s%s]' % (self.name, self.prefix, self.p1, self.p2)
+    return '%s [%s%s%s]' % (self.getDisasName(), self.prefix, self.p1, self.p2)
 
 class DecoderTable:
   def __init__(self, filename):
     self.instructions = []
-    with open('decoder_table') as f:
+    self.read_from_file('decoder_table')
+    self.expand_conditionals()
+
+  def expand_conditionals(self):
+    new_instructions = []
+    for i in self.instructions:
+      if i.isConditional():
+        new_instructions += i.expandConditional()
+      else:
+        new_instructions.append(i)
+    self.instructions = new_instructions
+
+  def read_from_file(self, filename):
+    with open(filename) as f:
       disas = None
       notes = []
       for line in f:

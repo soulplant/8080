@@ -104,7 +104,7 @@
     this.setFlag(CARRY, !this.getFlag(CARRY));
 
 11 CCC 000 RET
-  # R CCC
+  # R$CCC
   if (this.cond(CCC)) {
     this.pc = this.popU16();
   } else {
@@ -124,7 +124,7 @@
   this.loadImmU16('sp', this.rpValue('hl'));
 
 11 CCC 010 JMP 3 0
-  # J CCC, addr
+  # J$CCC addr
   if (this.cond(CCC)) {
     this.pc = arg16;
   } else {
@@ -155,7 +155,7 @@
 11 111 011 EI
 
 11 CCC 100 CALL 3 0
-  # C CCC addr
+  # C$CCC addr
   var nextPc = (this.pc + 3) & 0xffff;
   if (this.cond(CCC)) {
     this.pc = arg16;

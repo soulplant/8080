@@ -36,7 +36,7 @@ class Compiler:
       if i is None:
         # print 'failed to lookup %s' % int2bin(b, 8)
         continue
-      self.p('case 0x%s:  // %s %s' % (bintools.int2hex(b, 2), bintools.int2bin(b, 8), i.name))
+      self.p('case 0x%s:  // %s %s' % (bintools.int2hex(b, 2), bintools.int2bin(b, 8), i.getDisasName()))
       self.indent()
       self.caseBody(i, b)
       self.outdent()
