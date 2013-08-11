@@ -1,6 +1,7 @@
 var stepButton = document.getElementById('step');
 var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
+var stackDumpOutput = document.getElementById('stackdump');
 var instructionDumpOutput = document.getElementById('idump');
 var programListElem = document.getElementById('program-list');
 var asmInput = document.getElementById('asm');
@@ -66,8 +67,15 @@ function updateMemoryDump() {
   var addr = hex2int(addressInput.value);
   var text = '<invalid>';
   if (addr != -1)
-    text = getMemoryDump(cpu, addr);
+    text = getMemoryDump(cpu, addr, 4, 8);
   memDumpOutput.innerText = text;
+}
+
+function updateStackDump() {
+  var addr = cpu.sp;
+  var size = 0xffff - cpu.sp;
+  var rows = size / 2;
+  stackDumpOutput.innerText = getMemoryDump(cpu, addr, rows, 2);
 }
 
 function updateIDump() {
@@ -95,11 +103,11 @@ function int2hex(n, len) {
   return result;
 }
 
-function getMemoryDump(cpu, addr) {
+function getMemoryDump(cpu, addr, rows, columns) {
   var text = '';
-  for (var page = 0; page < 4; page++) {
-    for (var i = 0; i < 8; i++) {
-      text += int2hex(cpu.mem[addr + (page * 8) + i], 2);
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < columns; c++) {
+      text += int2hex(cpu.mem[addr + (r * columns) + c], 2);
       text += ' ';
     }
     text += '\n';
@@ -110,6 +118,7 @@ function getMemoryDump(cpu, addr) {
 function updateView() {
   updateRegViews();
   updateMemoryDump();
+  updateStackDump();
   updateIDump();
 }
 

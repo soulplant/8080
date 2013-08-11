@@ -3,16 +3,20 @@
   font-family: courier;
   font-size: 1em;
 }
-#left {
-  width: 40%;
+#left, #middle, #right {
   display: inline-block;
+  position: relative;
 }
-#right {
-  width: 40%;
-  display: inline-block;
+#middle {
+  width: 3em;
 }
 #asm {
   height: 25em;
+}
+#stackdump {
+  position: absolute:
+  top: 0;
+  left: 0;
 }
 </style>
 <body>
@@ -71,6 +75,10 @@
     <button id='step'>step</button>
     <select id='program-list'>
     </select>
+  </div>
+
+  <div id='middle'>
+    <pre id='stackdump'></pre>
   </div>
 
   <div id='right'>
