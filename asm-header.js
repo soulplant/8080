@@ -72,6 +72,13 @@ Arg.prototype.encodeRegPair = function(op) {
 Arg.prototype.encodeImmediate = function(op, size) {
   return new Immediate(op, size);
 };
+Arg.prototype.encodeCondition = function(op) {
+  var conditions = ['nz', 'z', 'nc', 'c', 'po', 'pe', 'p', 'm'];
+  var i = conditions.indexOf(op.toLowerCase());
+  if (i < 0)
+    return null;
+  return new Bits(i, 3, 3);
+};
 Arg.prototype.encode = function(op) {
   switch (this.name) {
     // Registers / [hl]
@@ -88,6 +95,8 @@ Arg.prototype.encode = function(op) {
       return this.encodeImmediate(op, 16);
     case 'db':
       return this.encodeImmediate(op, 8);
+    case 'CCC':
+      return this.encodeCondition(op);
     default:
       return null;
   }

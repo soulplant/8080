@@ -124,7 +124,7 @@
   this.loadImmU16('sp', this.rpValue('hl'));
 
 11 CCC 010 JMP 3 0
-  # J CCC
+  # J CCC, addr
   if (this.cond(CCC)) {
     this.pc = arg16;
   } else {

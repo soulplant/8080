@@ -6,7 +6,7 @@ dt = decoder.DecoderTable('decoder_table')
 def generateInstructionList():
   print "var instructionList = ["
   for i in dt.instructions:
-    print "  i('%s', '%s', '%s', %d)," % (i.name, i.rawTemplate(), i.getDisas(), i.size)
+    print "  i('%s', '%s', '%s', %d)," % (i.getDisasName(), i.rawTemplate(), i.getDisas(), i.size)
   print "];"
 
 with open('asm-header.js') as f:

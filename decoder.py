@@ -128,6 +128,11 @@ class Instruction:
     self.notes = []
     self.disas = None
 
+  def getDisasName(self):
+    if self.disas is None:
+      return self.name
+    return self.disas.split(' ')[0]
+
   def getDisas(self):
     if self.disas is None:
       return self.name
