@@ -4,5 +4,5 @@ if which nodejs ; then
 else
   NODE=node
 fi
-python b.py > cpu.js
+python gen-cpu.py > cpu.js
 $NODE cpu.js
