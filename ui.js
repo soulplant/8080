@@ -169,8 +169,8 @@ function assembleAndRun() {
 
 asmInput.addEventListener('keypress', function(e) {
   if (e.charCode == '13' && e.shiftKey) {
-    assembleAndRun();
     e.preventDefault();
+    assembleAndRun();
   }
 });
 asmRunButton.addEventListener('click', function() {

@@ -88,6 +88,8 @@ Arg.prototype.encode = function(op) {
       return this.encodeImmediate(op, 16);
     case 'db':
       return this.encodeImmediate(op, 8);
+    default:
+      return null;
   }
 };
 
@@ -117,7 +119,13 @@ Instruction.prototype.encode = function(asmStatement) {
   var frame = new Frame(this.size);
   frame.bytes[0] = base;
 
+  if (this.args.length != asmStatement.ops.length)
+    throw this.name + " xpected " + this.args.length + " args, got " + asmStatement.ops.length;
+
   this.args.forEach(function(arg, i) {
+    var encodedArg = arg.encode(asmStatement.ops[i]);
+    if (!encodedArg)
+      throw this.name + " couldn't encode arg " + i + " - " + asmStatement.ops[i];
     arg.encode(asmStatement.ops[i]).addToFrame(frame);
   });
 
@@ -169,6 +177,8 @@ Assembler.prototype.assemble = function() {
 };
 Assembler.prototype.handleInstruction = function(p) {
   var i = lookupInstruction(p.name);
+  if (!i)
+    throw "Unknown instruction: " + p.name;
   this.addBytes(i.encode(p));
 };
 Assembler.prototype.addBytes = function(bs) {
