@@ -168,6 +168,7 @@ function assembleAndRun() {
 }
 
 asmInput.addEventListener('keypress', function(e) {
+  e.cancelBubble = true;
   if (e.charCode == '13' && e.shiftKey) {
     e.preventDefault();
     assembleAndRun();
