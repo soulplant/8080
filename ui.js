@@ -8,6 +8,7 @@ var programListElem = document.getElementById('program-list');
 var asmInput = document.getElementById('asm');
 var asmOutput = document.getElementById('asm-out');
 var asmRunButton = document.getElementById('asm-run');
+var vidMemCanvas = document.getElementById('vidmem');
 
 var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc', 'sp'];
 var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
@@ -124,12 +125,47 @@ function getMemoryDump(cpu, addr, rows, columns, wordSize) {
   }
   return text;
 }
+// Palette is stored as 16 RGB triplets.
+function readPalette(addr) {
+  var colors = [];
+  for (var i = 0; i < 16; i++) {
+    var color = [];
+    for (var j = 0; j < 3; j++) {
+      color.push(cpu.mem[addr + (i * 3) + j]);
+    }
+    colors.push(color);
+  }
+  return colors;
+}
+
+var VID_MEM_START = 0x1000;
+var VID_MEM_WIDTH = 128;
+var VID_MEM_HEIGHT = 128;
+
+function updateVidMem() {
+  var palette = readPalette(VID_MEM_START);
+  var vidMemStart = VID_MEM_START + palette.length * 3;
+  var ctx = vidMemCanvas.getContext('2d');
+  var data = ctx.createImageData(VID_MEM_WIDTH, VID_MEM_HEIGHT);
+  for (var i = 0; i < VID_MEM_HEIGHT; i++) {
+    for (var j = 0; j < VID_MEM_WIDTH; j++) {
+      var index = i * VID_MEM_WIDTH + j;
+      var rgb = palette[cpu.mem[vidMemStart + index]];
+      data.data[index*4+0] = rgb[0];
+      data.data[index*4+1] = rgb[1];
+      data.data[index*4+2] = rgb[2];
+      data.data[index*4+3] = 0xff;
+    }
+  }
+  ctx.putImageData(data, 0, 0);
+}
 
 function updateView() {
   updateRegViews();
   updateMemoryDump();
   updateStackDump();
   updateIDump();
+  updateVidMem();
 }
 
 function step() {

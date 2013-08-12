@@ -3,7 +3,7 @@
   font-family: courier;
   font-size: 1em;
 }
-#left, #middle, #right {
+#left, #middle, #right, #right-2 {
   display: inline-block;
   position: relative;
 }
@@ -86,6 +86,9 @@
     <textarea id='asm' tabindex=1></textarea>
     <pre id='asm-out'></pre>
     <button id='asm-run'>assemble (shift+CR)</button>
+  </div>
+  <div id='right-2'>
+    <canvas id='vidmem' width='128' height='128'></canvas>
   </div>
 </body>
 <script>var module = {};</script>
