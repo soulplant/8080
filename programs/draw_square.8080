@@ -1,0 +1,22 @@
+  mvi a, 0xa0
+  sta 0x1000
+  mvi a, 0xaa
+  sta 0x1001
+  mvi a, 0xaa
+  sta 0x1002
+  mvi a, 0xa0
+  sta 0x1003
+
+  mvi a, 1
+  lxi bc, 0x1030
+  mvi e, 128
+outer_loop:
+  mvi d, 128
+loop:
+  stax bc
+  inx bc
+  dcr d
+  jnz loop
+  dcr e
+  jnz outer_loop
+  hlt
