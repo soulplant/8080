@@ -3,6 +3,7 @@
   # LXI RP, arg16
   this.loadImmU16(RP_NAME, arg16);
 00 RP1 001 DAD
+  # DAD RP
   this.dad(RP_NAME);
 00 000 010 STAX_B
   # STAX bc
