@@ -9,6 +9,7 @@ var asmInput = document.getElementById('asm');
 var asmOutput = document.getElementById('asm-out');
 var asmRunButton = document.getElementById('asm-run');
 var vidMemCanvas = document.getElementById('vidmem');
+var toggleRunButton = document.getElementById('toggle-run');
 
 var registers = ['b', 'c', 'd', 'e', 'h', 'l', 'a', 'f', 'pc', 'sp'];
 var flags = {'s': SIGN, 'z': ZERO, 'a': AUX_CARRY, 'p': PARITY, 'c': CARRY};
@@ -125,10 +126,17 @@ function getMemoryDump(cpu, addr, rows, columns, wordSize) {
   }
   return text;
 }
+
+var PALETTE_ENTRIES = 16;
+var PALETTE_ENTRY_SIZE = 3;
+var VID_MEM_START = 0x1000;
+var VID_MEM_WIDTH = 128;
+var VID_MEM_HEIGHT = 128;
+
 // Palette is stored as 16 RGB triplets.
 function readPalette(addr) {
   var colors = [];
-  for (var i = 0; i < 16; i++) {
+  for (var i = 0; i < PALETTE_ENTRIES; i++) {
     var color = [];
     for (var j = 0; j < 3; j++) {
       color.push(cpu.mem[addr + (i * 3) + j]);
@@ -137,10 +145,6 @@ function readPalette(addr) {
   }
   return colors;
 }
-
-var VID_MEM_START = 0x1000;
-var VID_MEM_WIDTH = 128;
-var VID_MEM_HEIGHT = 128;
 
 function updateVidMem() {
   var palette = readPalette(VID_MEM_START);
@@ -243,4 +247,32 @@ asmInput.addEventListener('keypress', function(e) {
 });
 asmRunButton.addEventListener('click', function() {
   assembleAndRun();
+});
+
+function Animator() {
+  this.running = false;
+};
+Animator.prototype.run = function() {
+  this.running = true;
+  var self = this;
+  requestAnimationFrame(function r() {
+    if (!self.running)
+      return;
+    self.running = cpu.runN(8000);
+    updateView();
+    if (self.running)
+      requestAnimationFrame(r);
+  });
+};
+Animator.prototype.stop = function() {
+  this.running = false;
+};
+
+var animator = new Animator();
+
+toggleRunButton.addEventListener('click', function() {
+  if (animator.running)
+    animator.stop();
+  else
+    animator.run();
 });

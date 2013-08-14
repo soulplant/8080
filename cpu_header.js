@@ -170,4 +170,14 @@ CPU.prototype.run = function() {
     this.execute();
   }
 };
+CPU.prototype.runN = function(n) {
+  this.running = true;
+  for (var i = 0; i < n; i++) {
+    this.execute();
+    if (!this.running)
+      return false;
+  }
+  this.running = false;
+  return true;
+};
 ///
