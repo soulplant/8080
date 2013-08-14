@@ -37,7 +37,9 @@ var AUX_CARRY = 16;
 var INTERRUPT = 32;
 var ZERO = 64;
 var SIGN = 128;
-CPU.prototype.parity = function(b) {
+
+var parityTable = [];
+function genParity(b) {
   var parity = true;
   var n = 1;
   for (var i = 0; i < 8; i++) {
@@ -46,6 +48,13 @@ CPU.prototype.parity = function(b) {
     n *= 2;
   }
   return parity;
+};
+for (var i = 0; i < 256; i++) {
+  parityTable[i] = genParity(i);
+}
+
+CPU.prototype.parity = function(b) {
+  return parityTable[b];
 };
 CPU.prototype.setFlag = function(f, v) {
   if (v)
@@ -59,7 +68,27 @@ CPU.prototype.getFlag = function(f) {
 CPU.prototype.rpValue = function(rp) {
   if (rp == 'sp')
     return this.sp;
-  return (this[rp[0]] << 8) | this[rp[1]];
+  switch (rp) {
+    case 'bc':
+      h = this.b;
+      l = this.c;
+      break;
+    case 'de':
+      h = this.d;
+      l = this.e;
+      break;
+    case 'hl':
+      h = this.h;
+      l = this.l;
+      break;
+    case 'af':
+      h = this.a;
+      l = this.f;
+      break;
+    default:
+      throw "bad rp:" + rp;
+  }
+  return (h << 8) | l;
 };
 CPU.prototype.storeU16 = function(addr, u16) {
   this.mem[addr] = 0xff & u16;
@@ -74,8 +103,28 @@ CPU.prototype.loadImmU16 = function(rp, u16) {
     this.sp = u16;
     return;
   }
-  this[rp[0]] = (u16 >> 8) & 0xff;
-  this[rp[1]] = u16 & 0xff;
+  var h = (u16 >> 8) & 0xff;
+  var l = u16 & 0xff;
+  switch (rp) {
+    case 'bc':
+      this.b = h;
+      this.c = l;
+      break;
+    case 'de':
+      this.d = h;
+      this.e = l;
+      break;
+    case 'hl':
+      this.h = h;
+      this.l = l;
+      break;
+    case 'af':
+      this.a = h;
+      this.f = l;
+      break;
+    default:
+      throw "bad rp:" + rp;
+  }
 };
 CPU.prototype.add = function(b, n, c) {
   this.setFlag(AUX_CARRY, (b & 0x7) + (n & 0x7) > 0x7);

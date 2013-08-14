@@ -3,7 +3,7 @@ import bintools
 import decoder
 import re
 import sys
-  
+
 dt = decoder.DecoderTable('decoder_table')
 
 class Compiler:

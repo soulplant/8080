@@ -1,5 +1,4 @@
 var stepButton = document.getElementById('step');
-var runButton = document.getElementById('run');
 var addressInput = document.getElementById('address');
 var memDumpOutput = document.getElementById('memdump');
 var stackDumpOutput = document.getElementById('stackdump');
@@ -146,11 +145,41 @@ function readPalette(addr) {
   return colors;
 }
 
+function FPS(name) {
+  this.name = name;
+  this.samples = [];
+  this.lastShown = new Date();
+}
+
+FPS.prototype.sample = function(s) {
+  this.samples.push(s);
+  while (s.length > 100)
+    this.samples.splice(0, 1);
+};
+FPS.prototype.fps = function() {
+  var total = 0;
+  for (var i = 0; i < this.samples.length; i++) {
+    total += this.samples[i];
+  }
+  return 1000 / (total / this.samples.length);
+};
+FPS.prototype.log = function() {
+  var now = new Date();
+  if ((now - this.lastShown) > 1000) {
+    console.log(this.name, 'fps:', this.fps());
+    this.lastShown = now;
+  }
+};
+
+var vidMemFps = new FPS('updateVidMem');
+
 function updateVidMem() {
+  var startTime = new Date();
   var palette = readPalette(VID_MEM_START);
   var vidMemStart = VID_MEM_START + palette.length * 3;
   var ctx = vidMemCanvas.getContext('2d');
   var data = ctx.createImageData(VID_MEM_WIDTH, VID_MEM_HEIGHT);
+
   for (var i = 0; i < VID_MEM_HEIGHT; i++) {
     for (var j = 0; j < VID_MEM_WIDTH; j++) {
       var index = i * VID_MEM_WIDTH + j;
@@ -162,6 +191,9 @@ function updateVidMem() {
     }
   }
   ctx.putImageData(data, 0, 0);
+  var endTime = new Date();
+  vidMemFps.sample(endTime - startTime);
+  vidMemFps.log();
 }
 
 function updateView() {
@@ -172,14 +204,49 @@ function updateView() {
   updateVidMem();
 }
 
-function step() {
-  cpu.execute();
-  updateView();
-}
+function Animator() {
+  this.running = false;
+  this.animFPS = new FPS('anim');
+};
+Animator.prototype.run = function() {
+  this.running = true;
+  this.lastRun = new Date();
+  var self = this;
+  requestAnimationFrame(function r() {
+    if (!self.running)
+      return;
+    var runTime = new Date();
+    var delta = runTime - self.lastRun;
+    self.lastRun = runTime;
+    self.animFPS.sample(delta);
+    self.animFPS.log();
 
-function run() {
-  cpu.run();
+    step();
+
+    if (self.running)
+      requestAnimationFrame(r);
+  });
+};
+Animator.prototype.stop = function() {
+  this.running = false;
+};
+Animator.prototype.toggle = function() {
+  if (this.running)
+    this.stop();
+  else
+    this.run();
+};
+
+var animator = new Animator();
+
+var cpuFPS = new FPS('cpu');
+function step() {
+  var startTime = new Date();
+  cpu.runN(80000);
   updateView();
+  var endTime = new Date();
+  cpuFPS.sample(endTime - startTime);
+  cpuFPS.log();
 }
 
 function resetAndLoad(bs) {
@@ -209,14 +276,12 @@ addressInput.addEventListener('change', function() {
 });
 
 stepButton.addEventListener('click', step);
-runButton.addEventListener('click', run);
 
 document.addEventListener('keypress', function(e) {
   if (e.keyCode == 's'.charCodeAt(0)) {
-    cpu.execute();
-    updateView();
+    step();
   } else if (e.keyCode == 'r'.charCodeAt(0)) {
-    assembleAndRun();
+    animator.toggle();
   }
 });
 
@@ -249,30 +314,6 @@ asmRunButton.addEventListener('click', function() {
   assembleAndRun();
 });
 
-function Animator() {
-  this.running = false;
-};
-Animator.prototype.run = function() {
-  this.running = true;
-  var self = this;
-  requestAnimationFrame(function r() {
-    if (!self.running)
-      return;
-    self.running = cpu.runN(8000);
-    updateView();
-    if (self.running)
-      requestAnimationFrame(r);
-  });
-};
-Animator.prototype.stop = function() {
-  this.running = false;
-};
-
-var animator = new Animator();
-
 toggleRunButton.addEventListener('click', function() {
-  if (animator.running)
-    animator.stop();
-  else
-    animator.run();
+  animator.toggle();
 });
