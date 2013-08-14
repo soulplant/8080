@@ -221,7 +221,7 @@ Animator.prototype.run = function() {
     self.animFPS.sample(delta);
     self.animFPS.log();
 
-    step();
+    step(80000);
 
     if (self.running)
       requestAnimationFrame(r);
@@ -240,9 +240,11 @@ Animator.prototype.toggle = function() {
 var animator = new Animator();
 
 var cpuFPS = new FPS('cpu');
-function step() {
+function step(n) {
+  if (!n)
+    n = 1;
   var startTime = new Date();
-  cpu.runN(80000);
+  cpu.runN(n);
   updateView();
   var endTime = new Date();
   cpuFPS.sample(endTime - startTime);
@@ -275,13 +277,17 @@ addressInput.addEventListener('change', function() {
   updateMemoryDump();
 });
 
-stepButton.addEventListener('click', step);
+stepButton.addEventListener('click', step.bind(1));
 
 document.addEventListener('keypress', function(e) {
   if (e.keyCode == 's'.charCodeAt(0)) {
-    step();
+    step(1);
+  } else if (e.keyCode == 'S'.charCodeAt(0)) {
+    step(80000);
   } else if (e.keyCode == 'r'.charCodeAt(0)) {
     animator.toggle();
+  } else if (e.keyCode == 'R'.charCodeAt(0)) {
+    assembleAndRun();
   }
 });
 
